@@ -14,6 +14,7 @@ defmodule Playwright.Locator do
   """
 
   alias Playwright.{ElementHandle, Frame, Locator, Page}
+  alias Playwright.Page.FrameLocator
   alias Playwright.SDK.Channel
 
   @enforce_keys [:frame, :selector]
@@ -288,8 +289,23 @@ defmodule Playwright.Locator do
     Frame.click(locator.frame, locator.selector, options)
   end
 
-  # @spec content_frame(Locator.t()) :: FrameLocator.t()
-  # def content_frame(locator)
+  @doc """
+  Returns a FrameLocator pointing to the same element as this locator.
+
+  Use this when the locator points to an iframe element and you want to
+  access the frame's content.
+
+  ## Returns
+
+  - `FrameLocator.t()`
+  """
+  @spec content_frame(t()) :: FrameLocator.t()
+  def content_frame(%Locator{frame: frame, selector: selector}) do
+    %FrameLocator{
+      frame: frame,
+      selector: selector
+    }
+  end
 
   @doc """
   Returns the number of elements matching given selector.
@@ -691,8 +707,26 @@ defmodule Playwright.Locator do
 
   # ---
 
-  # @spec frame_locator(t(), binary()) :: FrameLocator.t()
-  # def frame_locator(locator, selector)
+  @doc """
+  Returns a FrameLocator pointing to an iframe within this locator's scope.
+
+  ## Arguments
+
+  | key/name   | type       |             | description                    |
+  | ---------- | ---------- | ----------- | ------------------------------ |
+  | `selector` | param      | `binary()`  | Selector to locate the iframe. |
+
+  ## Returns
+
+  - `FrameLocator.t()`
+  """
+  @spec frame_locator(t(), binary()) :: FrameLocator.t()
+  def frame_locator(%Locator{frame: frame, selector: selector}, iframe_selector) do
+    %FrameLocator{
+      frame: frame,
+      selector: selector <> " >> " <> iframe_selector
+    }
+  end
 
   # ---
 

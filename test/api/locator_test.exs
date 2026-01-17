@@ -179,7 +179,21 @@ defmodule Playwright.LocatorTest do
     end
   end
 
-  # test_locator_content_frame_should_work
+  describe "Locator.content_frame/1" do
+    test "returns a FrameLocator for the iframe element", %{page: page} do
+      alias Playwright.Page.FrameLocator
+
+      Page.set_content(page, ~s|<iframe id="my-frame"></iframe>|)
+
+      frame_locator =
+        page
+        |> Page.locator("#my-frame")
+        |> Locator.content_frame()
+
+      assert %FrameLocator{} = frame_locator
+      assert frame_locator.selector == "#my-frame"
+    end
+  end
 
   # describe "Locator.count/1" do
   #   test "returns the number of elements matching the given selector" do
@@ -505,6 +519,26 @@ defmodule Playwright.LocatorTest do
 
       assert Locator.get_attribute(locator, "name") == "value"
       assert Locator.get_attribute(locator, "bogus") == nil
+    end
+  end
+
+  describe "Locator.frame_locator/2" do
+    test "returns a FrameLocator scoped to the locator", %{page: page} do
+      alias Playwright.Page.FrameLocator
+
+      Page.set_content(page, ~s|
+        <div id="container">
+          <iframe id="my-frame"></iframe>
+        </div>
+      |)
+
+      frame_locator =
+        page
+        |> Page.locator("#container")
+        |> Locator.frame_locator("#my-frame")
+
+      assert %FrameLocator{} = frame_locator
+      assert frame_locator.selector == "#container >> #my-frame"
     end
   end
 

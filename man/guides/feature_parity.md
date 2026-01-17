@@ -196,8 +196,8 @@ This document tracks the implementation status of Playwright features in playwri
 | `getByPlaceholder(text, options)` | [x] | |
 | `getByAltText(text, options)` | [x] | |
 | `getByTitle(text, options)` | [x] | |
-| `frameLocator(selector)` | [ ] | |
-| `contentFrame()` | [ ] | |
+| `frameLocator(selector)` | [x] | |
+| `contentFrame()` | [x] | |
 | `owner()` | [ ] | |
 
 ### Actions

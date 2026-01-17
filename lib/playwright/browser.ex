@@ -146,10 +146,10 @@ defmodule Playwright.Browser do
   This is a convenience API function that should only be used for single-page
   scenarios and short snippets. Production code and testing frameworks should
   explicitly create via `Playwright.Browser.new_context/2` followed by
-  `Playwright.BrowserContext.new_page/2`, given the new context, to manage
+  `Playwright.BrowserContext.new_page/1`, given the new context, to manage
   resource lifecycles.
   """
-  @spec new_page(t(), options()) :: {:ok, Page.t()} | {:error, Channel.Error.t()}
+  @spec new_page(t(), options()) :: {:ok, Page.t()} | {:error, term()}
   def new_page(browser, options \\ %{})
 
   def new_page(%Browser{session: session} = browser, options) do

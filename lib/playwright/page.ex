@@ -661,7 +661,7 @@ defmodule Playwright.Page do
 
   | key/name      | type   |            | description |
   | ------------- | ------ | ---------- | ----------- |
-  | `:timeout`    | option | `number()` | Maximum time in milliseconds. Pass `0` to disable timeout. The default value can be changed via `Playwright.BrowserContext.set_default_timeout/2` or `Playwright.Page.set_default_timeout/2`. `(default: 30 seconds)` |
+  | `:timeout`    | option | `number()` | Maximum time in milliseconds. Pass `0` to disable timeout. The default value can be changed via BrowserContext or Page timeout settings. `(default: 30 seconds)` |
   | `:wait_until` | option | `binary()` | "load", "domcontentloaded", "networkidle", or "commit". When to consider the operation as having succeeded. `(default: "load")` |
 
   ## On Wait Events
@@ -692,7 +692,7 @@ defmodule Playwright.Page do
     |> List.first()
   end
 
-  @spec route(t(), binary() | Regex.t(), function(), map()) :: t() | {:error, Channel.Error.t()}
+  @spec route(t(), binary() | Regex.t(), function(), map()) :: t() | {:error, term()}
   def route(page, pattern, handler, options \\ %{})
 
   def route(%Page{session: session} = page, pattern, handler, _options) do

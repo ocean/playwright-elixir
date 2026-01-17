@@ -29,7 +29,7 @@ defmodule Playwright.BrowserContext do
   The second argument is the event type.
 
   The third argument is a callback function that will be executed when the
-  event fires, and is passed an instance of `Playwright.SDK.Channel.Event`.
+  event fires, and is passed an event struct containing the event details.
 
   ### Details for `expect_event/5`
 
@@ -386,18 +386,18 @@ defmodule Playwright.BrowserContext do
   predicate function.
 
   Returns when the predicate returns a truthy value. Throws an error if the
-  context closes before the event is fired. Returns a `Playwright.SDK.Channel.Event`.
+  context closes before the event is fired. Returns a channel event struct.
 
   ## Arguments
 
   - `event`: Event name; the same as those passed to `Playwright.BrowserContext.on/3`
-  - `predicate`: Receives the `Playwright.SDK.Channel.Event` and resolves to a
+  - `predicate`: Receives the channel event and resolves to a
     "truthy" value when the waiting should resolve.
   - `options`:
     - `predicate`: ...
     - `timeout`: The maximum time to wait in milliseconds. Defaults to 30000
       (30 seconds). Pass 0 to disable timeout. The default value can be changed
-      via `Playwright.BrowserContext.set_default_timeout/2`.
+      via BrowserContext timeout settings.
 
   ## Example
 
@@ -416,7 +416,7 @@ defmodule Playwright.BrowserContext do
   the `Playwright.BrowserContext`.
 
   If `predicate` is provided, it passes the `Playwright.Page` value into the
-  predicate function, wrapped in `Playwright.SDK.Channel.Event`, and waits for
+  predicate function, wrapped in a channel event struct, and waits for
   `predicate/1` to return a "truthy" value. Throws an error if the context
   closes before new `Playwright.Page` is created.
 
@@ -428,10 +428,9 @@ defmodule Playwright.BrowserContext do
     - `predicate`: ...
     - `timeout`: The maximum time to wait in milliseconds. Defaults to 30000
       (30 seconds). Pass 0 to disable timeout. The default value can be changed
-      via `Playwright.BrowserContext.set_default_timeout/2`.
+      via BrowserContext timeout settings.
   """
-  # Temporarily disable spec:
-  # @spec expect_page(t(), map(), function()) :: Playwright.SDK.Channel.Event.t()
+  # Temporarily disable spec (channel event type is internal)
   def expect_page(context, options \\ %{}, trigger \\ nil) do
     expect_event(context, :page, options, trigger)
   end
@@ -476,13 +475,13 @@ defmodule Playwright.BrowserContext do
     end)
   end
 
-  @spec grant_permissions(t(), [String.t()], options()) :: :ok | {:error, Channel.Error.t()}
+  @spec grant_permissions(t(), [String.t()], options()) :: :ok | {:error, term()}
   def grant_permissions(%BrowserContext{session: session} = context, permissions, options \\ %{}) do
     params = Map.merge(%{permissions: permissions}, options)
     Channel.post(session, {:guid, context.guid}, :grant_permissions, params)
   end
 
-  @spec new_cdp_session(t(), Frame.t() | Page.t()) :: Playwright.CDPSession.t()
+  @spec new_cdp_session(t(), Frame.t() | Page.t()) :: struct()
   def new_cdp_session(context, owner)
 
   def new_cdp_session(%BrowserContext{session: session} = context, %Frame{} = frame) do
@@ -533,7 +532,7 @@ defmodule Playwright.BrowserContext do
     Channel.list(context.session, {:guid, context.guid}, "Page")
   end
 
-  @spec route(t(), binary() | Regex.t(), function(), map()) :: t() | {:error, Channel.Error.t()}
+  @spec route(t(), binary() | Regex.t(), function(), map()) :: t() | {:error, term()}
   def route(context, pattern, handler, options \\ %{})
 
   def route(%BrowserContext{session: session} = context, pattern, handler, _options) do
@@ -593,7 +592,7 @@ defmodule Playwright.BrowserContext do
 
   # ---
 
-  @spec unroute(t(), binary() | Regex.t(), function() | nil) :: t() | {:error, Channel.Error.t()}
+  @spec unroute(t(), binary() | Regex.t(), function() | nil) :: t() | {:error, term()}
   def unroute(%BrowserContext{session: session} = context, pattern, callback \\ nil) do
     with_latest(context, fn context ->
       remaining =

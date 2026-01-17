@@ -48,9 +48,9 @@ defmodule Playwright do
   | key/name  | typ   |             | description |
   | ----------| ----- | ----------- | ----------- |
   | `client`  | param | `client()`  | The type of client (browser) to launch. |
-  | `options` | param | `options()` | `Playwright.SDK.Config.connect_options()` |
+  | `options` | param | `options()` | Connection options (see Config module) |
   """
-  @spec launch(client(), Config.connect_options() | map()) :: {:ok, Playwright.Browser.t()}
+  @spec connect(client(), map()) :: {:ok, Playwright.Browser.t()}
   def connect(client, options \\ %{}) do
     options = Map.merge(Config.connect_options(), options)
     {:ok, session} = new_session(Playwright.SDK.Transport.WebSocket, options)
@@ -70,9 +70,9 @@ defmodule Playwright do
   | key/name  | typ   |             | description |
   | ----------| ----- | ----------- | ----------- |
   | `client`  | param | `client()`  | The type of client (browser) to launch. |
-  | `options` | param | `options()` | `Playwright.SDK.Config.launch_options()` |
+  | `options` | param | `options()` | Launch options (see Config module) |
   """
-  @spec launch(client(), Config.launch_options() | map()) :: {:ok, Playwright.Browser.t()}
+  @spec launch(client(), map()) :: {:ok, Playwright.Browser.t()}
   def launch(client, options \\ %{}) do
     options = Map.merge(Config.launch_options(), options)
     {:ok, session} = new_session(Playwright.SDK.Transport.Driver, options)

@@ -16,8 +16,8 @@ defmodule Playwright.ElementHandle do
       :ok = ElementHandle.click(handle)
 
   `ElementHandle` prevents DOM elements from garbage collection unless the
-  handle is disposed with `Playwright.JSHandle.dispose/1`. `ElementHandles`
-  are auto-disposed when their origin frame is navigated.
+  handle is disposed. `ElementHandles` are auto-disposed when their origin
+  frame is navigated.
 
   An `ElementHandle` instance can be used as an argument in
   `Playwright.Page.eval_on_selector/5` and `Playwright.Page.evaluate/3`.

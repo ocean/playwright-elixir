@@ -1016,4 +1016,20 @@ defmodule Playwright.LocatorTest do
       assert [:ok, %Locator{}] = Task.await_many([setup, check])
     end
   end
+
+  describe "Locator.highlight/1" do
+    test "highlights elements matching the locator", %{page: page} do
+      Page.set_content(page, ~s|<div id="target">Hello</div>|)
+      locator = Locator.new(page, "#target")
+      assert :ok = Locator.highlight(locator)
+    end
+  end
+
+  describe "Locator.page/1" do
+    test "returns the page containing the locator", %{page: page} do
+      locator = Locator.new(page, "div")
+      result = Locator.page(locator)
+      assert result.guid == page.guid
+    end
+  end
 end

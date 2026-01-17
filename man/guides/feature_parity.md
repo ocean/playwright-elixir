@@ -224,7 +224,7 @@ This document tracks the implementation status of Playwright features in playwri
 | `dragTo(target, options)` | [x] | |
 | `scrollIntoViewIfNeeded(options)` | [~] | As `scroll_into_view` |
 | `dispatchEvent(type, eventInit, options)` | [x] | |
-| `highlight()` | [ ] | |
+| `highlight()` | [x] | |
 
 ### Query Methods
 
@@ -279,7 +279,7 @@ This document tracks the implementation status of Playwright features in playwri
 
 | Method | Status | Notes |
 |--------|--------|-------|
-| `page()` | [ ] | |
+| `page()` | [x] | |
 | `describe(description)` | [ ] | |
 
 ---

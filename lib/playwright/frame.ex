@@ -589,6 +589,27 @@ defmodule Playwright.Frame do
   end
 
   @doc """
+  Highlights the element(s) matching the selector.
+
+  This is useful for debugging to visually see which elements match a selector.
+
+  ## Arguments
+
+  | key/name   | type      |            | description                        |
+  | ---------- | --------- | ---------- | ---------------------------------- |
+  | `selector` | param     | `binary()` | A selector to highlight elements.  |
+
+  ## Returns
+
+  - `:ok`
+  """
+  @spec highlight(t(), binary()) :: :ok
+  def highlight(%Frame{session: session, guid: guid}, selector) do
+    Channel.post(session, {:guid, guid}, :highlight, %{selector: selector})
+    :ok
+  end
+
+  @doc """
   Hovers over an element matching `param: selector`.
 
   Performs the following steps:

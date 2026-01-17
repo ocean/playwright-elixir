@@ -974,8 +974,19 @@ defmodule Playwright.Locator do
     locator |> Locator.locator(get_by_title_selector(text, options))
   end
 
-  # @spec highlight(Locator.t()) :: :ok
-  # def highlight(locator)
+  @doc """
+  Highlights the element(s) matching this locator.
+
+  This is useful for debugging to visually see which elements match.
+
+  ## Returns
+
+  - `:ok`
+  """
+  @spec highlight(t()) :: :ok
+  def highlight(%Locator{frame: frame, selector: selector}) do
+    Frame.highlight(frame, selector)
+  end
 
   @doc """
   Hovers over the element.
@@ -1214,8 +1225,17 @@ defmodule Playwright.Locator do
     raise ArgumentError, "Locators must belong to the same frame"
   end
 
-  # @spec page(Locator.t()) :: Page.t()
-  # def page(locator)
+  @doc """
+  Returns the Page containing this locator.
+
+  ## Returns
+
+  - `Page.t()`
+  """
+  @spec page(t()) :: Page.t()
+  def page(%Locator{frame: frame}) do
+    Frame.page(frame)
+  end
 
   @doc """
   Focuses the element, and then uses `keyboard.down(key)` and `keyboard.up(key)`.

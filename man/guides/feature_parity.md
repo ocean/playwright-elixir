@@ -26,7 +26,7 @@ This document tracks the implementation status of Playwright features in playwri
 | `goBack(options)` | [x] | |
 | `goForward(options)` | [x] | |
 | `waitForLoadState(state, options)` | [x] | |
-| `waitForNavigation(options)` | [ ] | !Priority - commonly needed |
+| `waitForNavigation(options)` | [x] | |
 | `waitForURL(url, options)` | [x] | Polling-based implementation |
 | `waitForRequest(urlOrPredicate, options)` | [ ] | |
 | `waitForResponse(urlOrPredicate, options)` | [ ] | |
@@ -401,8 +401,8 @@ This document tracks the implementation status of Playwright features in playwri
 | Method | Status | Notes |
 |--------|--------|-------|
 | `goto(url, options)` | [x] | |
-| `waitForNavigation(options)` | [ ] | |
-| `waitForURL(url, options)` | [ ] | |
+| `waitForNavigation(options)` | [x] | |
+| `waitForURL(url, options)` | [x] | |
 | `waitForLoadState(state, options)` | [x] | |
 | `url()` | [x] | |
 | `name()` | [ ] | |
@@ -608,7 +608,7 @@ These modules exist but have no implemented methods (all commented out):
 
 ### Phase 1: Core Navigation & Waiting (High Impact)
 1. ~~`Page.goBack()` / `Page.goForward()`~~ DONE
-2. `Page.waitForNavigation()`
+2. ~~`Page.waitForNavigation()`~~ DONE
 3. ~~`Page.waitForURL()`~~ DONE
 4. ~~`Dialog.accept()` / `Dialog.dismiss()`~~ DONE
 

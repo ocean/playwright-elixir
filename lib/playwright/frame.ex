@@ -943,15 +943,28 @@ defmodule Playwright.Frame do
   @spec wait_for_load_state(Frame.t(), binary(), options()) :: Frame.t()
   def wait_for_load_state(frame, state \\ "load", options \\ %{})
 
-  def wait_for_load_state(%Frame{session: session} = frame, state, _options)
+  def wait_for_load_state(%Frame{session: session} = frame, state, options)
       when is_binary(state)
       when state in ["load", "domcontentloaded", "networkidle", "commit"] do
     if Enum.member?(frame.load_states, state) do
       frame
     else
-      # e = Channel.wait_for(frame, :loadstate)
-      {:ok, e} = Channel.wait(session, {:guid, frame.guid}, :loadstate)
-      e.target
+      # Predicate fetches fresh frame to check if state has been added
+      # (bind handler updates frame.load_states on loadstate events)
+      predicate = fn _resource, _event ->
+        fresh_frame = Channel.find(session, {:guid, frame.guid})
+        Enum.member?(fresh_frame.load_states, state)
+      end
+
+      wait_options = Map.merge(%{predicate: predicate}, options)
+
+      case Channel.wait(session, {:guid, frame.guid}, :loadstate, wait_options) do
+        %Playwright.SDK.Channel.Event{} = _e ->
+          Channel.find(session, {:guid, frame.guid})
+
+        {:error, _} = error ->
+          error
+      end
     end
   end
 
@@ -965,8 +978,87 @@ defmodule Playwright.Frame do
 
   # ---
 
-  # @spec wait_for_navigation(Frame.t(), options()) :: :ok
-  # def wait_for_navigation(frame, options \\ %{})
+  @doc """
+  Waits for the frame to navigate to a new URL.
+
+  Returns when the frame navigates and reaches the required load state.
+  This resolves when the frame navigates to a new URL or reloads.
+
+  ## Options
+
+  - `:timeout` - Maximum time in milliseconds. Defaults to 30000 (30 seconds).
+  - `:wait_until` - When to consider navigation succeeded. Defaults to `"load"`.
+    - `"load"` - wait for the load event
+    - `"domcontentloaded"` - wait for DOMContentLoaded event
+    - `"networkidle"` - wait until no network connections for 500ms
+    - `"commit"` - wait for network response and document started loading
+  - `:url` - URL pattern to wait for. Can be:
+    - A string with glob pattern (e.g., `"**/login"`)
+    - A regex (e.g., `~r/\\/login$/`)
+    - A function that receives URL and returns boolean
+
+  ## Examples
+
+      # With a trigger function (recommended)
+      Frame.wait_for_navigation(frame, fn -> Page.click(page, "a") end)
+
+      # With options and trigger
+      Frame.wait_for_navigation(frame, %{url: "**/success"}, fn -> Page.click(page, "a") end)
+
+  ## Returns
+
+  - `Frame.t()` - The frame after navigation
+  - `{:error, term()}` - If timeout occurs or navigation fails
+  """
+  @spec wait_for_navigation(t(), options() | function(), function() | nil) :: t() | {:error, term()}
+  def wait_for_navigation(frame, options_or_trigger \\ %{}, trigger \\ nil)
+
+  def wait_for_navigation(%Frame{} = frame, trigger, nil) when is_function(trigger) do
+    wait_for_navigation(frame, %{}, trigger)
+  end
+
+  def wait_for_navigation(%Frame{session: session} = frame, options, trigger) when is_map(options) do
+    alias Playwright.SDK.Helpers.URLMatcher
+
+    timeout = Map.get(options, :timeout, 30_000)
+    wait_until = Map.get(options, :wait_until, "load")
+    url_pattern = Map.get(options, :url)
+
+    predicate = build_navigation_predicate(url_pattern)
+
+    wait_options = %{timeout: timeout}
+    wait_options = if predicate, do: Map.put(wait_options, :predicate, predicate), else: wait_options
+
+    case Channel.wait(session, {:guid, frame.guid}, :navigated, wait_options, trigger) do
+      %Playwright.SDK.Channel.Event{} = event ->
+        case Map.get(event.params, :error) do
+          nil ->
+            fresh_frame = Channel.find(session, {:guid, frame.guid})
+            wait_for_load_state(fresh_frame, wait_until, %{timeout: timeout})
+
+          error_message ->
+            {:error, %Playwright.SDK.Channel.Error{type: "NavigationError", message: error_message}}
+        end
+
+      {:error, _} = error ->
+        error
+    end
+  end
+
+  defp build_navigation_predicate(nil), do: nil
+
+  defp build_navigation_predicate(url_pattern) do
+    alias Playwright.SDK.Helpers.URLMatcher
+    matcher = URLMatcher.new(url_pattern)
+
+    fn _resource, event ->
+      if Map.get(event.params, :error) do
+        true
+      else
+        URLMatcher.matches(matcher, Map.get(event.params, :url, ""))
+      end
+    end
+  end
 
   # ---
 

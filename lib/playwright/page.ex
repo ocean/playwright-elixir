@@ -827,6 +827,45 @@ defmodule Playwright.Page do
     wait_for_load_state(page, "load", options)
   end
 
+  @doc """
+  Waits for the main frame to navigate to a new URL.
+
+  Returns when the page navigates and reaches the required load state.
+  This is a shortcut for `Frame.wait_for_navigation/3` on the page's main frame.
+
+  ## Options
+
+  - `:timeout` - Maximum time in milliseconds. Defaults to 30000 (30 seconds).
+  - `:wait_until` - When to consider navigation succeeded. Defaults to `"load"`.
+  - `:url` - URL pattern to wait for (glob, regex, or function).
+
+  ## Examples
+
+      # With a trigger function (recommended)
+      Page.wait_for_navigation(page, fn -> Page.click(page, "a") end)
+
+      # With options and trigger
+      Page.wait_for_navigation(page, %{url: "**/success"}, fn -> Page.click(page, "a") end)
+
+  ## Returns
+
+  - `Page.t()` - The page after navigation
+  - `{:error, term()}` - If timeout occurs or navigation fails
+  """
+  @spec wait_for_navigation(t(), options() | function(), function() | nil) :: t() | {:error, term()}
+  def wait_for_navigation(page, options_or_trigger \\ %{}, trigger \\ nil)
+
+  def wait_for_navigation(%Page{} = page, trigger, nil) when is_function(trigger) do
+    wait_for_navigation(page, %{}, trigger)
+  end
+
+  def wait_for_navigation(%Page{} = page, options, trigger) when is_map(options) do
+    case main_frame(page) |> Frame.wait_for_navigation(options, trigger) do
+      {:error, _} = error -> error
+      _frame -> page
+    end
+  end
+
   @spec wait_for_selector(t(), binary(), map()) :: ElementHandle.t() | nil
   def wait_for_selector(%Page{} = page, selector, options \\ %{}) do
     main_frame(page) |> Frame.wait_for_selector(selector, options)

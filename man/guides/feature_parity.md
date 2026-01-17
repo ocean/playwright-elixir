@@ -136,7 +136,7 @@ This document tracks the implementation status of Playwright features in playwri
 | Method | Status | Notes |
 |--------|--------|-------|
 | `screenshot(options)` | [x] | |
-| `pdf(options)` | [ ] | Chromium only |
+| `pdf(options)` | [x] | Chromium only |
 | `video()` | [ ] | |
 | `emulateMedia(options)` | [ ] | |
 
@@ -626,7 +626,7 @@ These modules exist but have no implemented methods (all commented out):
 ### Phase 4: Advanced Features
 1. ~~`Mouse` module~~ DONE
 2. ~~`FrameLocator` module~~ DONE
-3. `Page.pdf()`
+3. ~~`Page.pdf()`~~ DONE
 4. `Tracing` module
 
 ### Phase 5: Completeness

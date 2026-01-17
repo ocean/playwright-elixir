@@ -749,6 +749,58 @@ defmodule Playwright.Page do
   end
 
   @doc """
+  Generates a PDF of the page.
+
+  Only supported in Chromium headless mode.
+
+  ## Options
+
+  - `:scale` - Scale of the webpage rendering. Default: `1`.
+  - `:display_header_footer` - Display header and footer. Default: `false`.
+  - `:header_template` - HTML template for the print header.
+  - `:footer_template` - HTML template for the print footer.
+  - `:print_background` - Print background graphics. Default: `false`.
+  - `:landscape` - Paper orientation. Default: `false`.
+  - `:page_ranges` - Paper ranges to print, e.g., `"1-5, 8, 11-13"`.
+  - `:format` - Paper format. If set, takes priority over width/height.
+  - `:width` - Paper width, accepts values labeled with units.
+  - `:height` - Paper height, accepts values labeled with units.
+  - `:prefer_css_page_size` - Prefer page size as defined by CSS. Default: `false`.
+  - `:margin` - Paper margins as map with `:top`, `:right`, `:bottom`, `:left` keys.
+  - `:tagged` - Generate tagged (accessible) PDF. Default: `false`.
+  - `:outline` - Generate document outline. Default: `false`.
+  - `:path` - File path to save the PDF to.
+  """
+  @spec pdf(t(), options()) :: binary()
+  def pdf(%Page{session: session} = page, options \\ %{}) do
+    {path, params} = Map.pop(options, :path)
+
+    params =
+      params
+      |> rename_key(:display_header_footer, :displayHeaderFooter)
+      |> rename_key(:header_template, :headerTemplate)
+      |> rename_key(:footer_template, :footerTemplate)
+      |> rename_key(:print_background, :printBackground)
+      |> rename_key(:page_ranges, :pageRanges)
+      |> rename_key(:prefer_css_page_size, :preferCSSPageSize)
+
+    data = Channel.post(session, {:guid, page.guid}, :pdf, params)
+
+    if path do
+      File.write!(path, Base.decode64!(data))
+    end
+
+    data
+  end
+
+  defp rename_key(map, old_key, new_key) do
+    case Map.pop(map, old_key) do
+      {nil, map} -> map
+      {value, map} -> Map.put(map, new_key, value)
+    end
+  end
+
+  @doc """
   A shortcut for the main frame's `Playwright.Frame.select_option/4`.
   """
   @spec select_option(t(), binary(), any(), options()) :: [binary()]

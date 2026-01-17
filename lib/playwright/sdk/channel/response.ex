@@ -77,6 +77,10 @@ defmodule Playwright.SDK.Channel.Response do
     value
   end
 
+  defp parse([{:pdf, value}], _catalog) do
+    value
+  end
+
   defp parse([{:cookies, cookies}], _catalog) do
     cookies
   end

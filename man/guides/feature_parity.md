@@ -187,7 +187,7 @@ This document tracks the implementation status of Playwright features in playwri
 | `last()` | [x] | |
 | `nth(index)` | [x] | |
 | `filter(options)` | [x] | has_text, has_not_text, has, has_not, visible |
-| `and(locator)` | [ ] | Combine locators |
+| `and(locator)` | [x] | As `and_` |
 | `or(locator)` | [x] | As `or_` |
 | `getByText(text, options)` | [x] | |
 | `getByRole(role, options)` | [x] | |

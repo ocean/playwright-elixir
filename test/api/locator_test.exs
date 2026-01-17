@@ -41,6 +41,50 @@ defmodule Playwright.LocatorTest do
     end
   end
 
+  describe "Locator.and_/2" do
+    test "matches elements that satisfy both locators", %{page: page} do
+      Page.set_content(page, ~s|
+        <div class="foo">hello</div>
+        <div class="bar">world</div>
+        <div class="foo bar">both</div>
+      |)
+
+      locator =
+        page
+        |> Page.locator(".foo")
+        |> Locator.and_(Page.locator(page, ".bar"))
+
+      assert Locator.count(locator) == 1
+      assert Locator.text_content(locator) == "both"
+    end
+
+    test "returns empty when no elements match both", %{page: page} do
+      Page.set_content(page, ~s|
+        <div class="foo">hello</div>
+        <span class="bar">world</span>
+      |)
+
+      locator =
+        page
+        |> Page.locator(".foo")
+        |> Locator.and_(Page.locator(page, ".bar"))
+
+      assert Locator.count(locator) == 0
+    end
+
+    test "raises when locators belong to different frames", %{page: page, browser: browser} do
+      {:ok, other_page} = Playwright.Browser.new_page(browser)
+
+      assert_raise ArgumentError, "Locators must belong to the same frame", fn ->
+        page
+        |> Page.locator("div")
+        |> Locator.and_(Page.locator(other_page, "span"))
+      end
+
+      Page.close(other_page)
+    end
+  end
+
   describe "Locator.blur/2 AND Locator.focus/2" do
     test "deactivates/activates an element", %{assets: assets, page: page} do
       button = Page.locator(page, "button")

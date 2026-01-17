@@ -1137,13 +1137,43 @@ defmodule Playwright.Locator do
   end
 
   @doc """
+  Returns a new `Playwright.Locator` that matches elements satisfying both this locator and the given locator.
+
+  This implements the `and` function for locators, but `and` is not an allowed function name in Elixir.
+
+  ## Arguments
+
+  | key/name  | type   |             | description                 |
+  | --------- | ------ | ----------- | --------------------------- |
+  | `locator` | param  | `Locator.t` | Locator to match as well.   |
+
+  ## Returns
+
+  - `Locator.t`
+
+  ## Example
+
+      page
+      |> Page.locator("div")
+      |> Locator.and_(Page.locator(page, ".highlighted"))
+  """
+  @spec and_(t(), t()) :: t()
+  def and_(%Locator{frame: frame} = locator, %Locator{frame: frame} = other) do
+    new(frame, locator.selector <> " >> internal:and=" <> Jason.encode!(other.selector))
+  end
+
+  def and_(_, _) do
+    raise ArgumentError, "Locators must belong to the same frame"
+  end
+
+  @doc """
   Returns a new `Playwright.Locator` that matches either of the conditions of the given locators.
 
-  This implements the `or` function for locators, but `or` is not an allowed function name in elixir.
+  This implements the `or` function for locators, but `or` is not an allowed function name in Elixir.
   """
   @spec or_(Locator.t(), Locator.t()) :: Locator.t()
   def or_(%Locator{frame: frame} = locator, %Locator{frame: frame} = other) do
-    new(frame, locator.selector <> ">> internal:or=" <> Jason.encode!(other.selector))
+    new(frame, locator.selector <> " >> internal:or=" <> Jason.encode!(other.selector))
   end
 
   def or_(_, _) do

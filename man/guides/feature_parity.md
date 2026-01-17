@@ -94,16 +94,16 @@ This document tracks the implementation status of Playwright features in playwri
 | Method | Status | Notes |
 |--------|--------|-------|
 | `textContent(selector, options)` | [x] | |
-| `innerText(selector, options)` | [ ] | |
-| `innerHTML(selector, options)` | [ ] | |
+| `innerText(selector, options)` | [x] | |
+| `innerHTML(selector, options)` | [x] | |
 | `getAttribute(selector, name, options)` | [x] | |
-| `inputValue(selector, options)` | [ ] | |
-| `isChecked(selector, options)` | [ ] | |
-| `isDisabled(selector, options)` | [ ] | |
-| `isEditable(selector, options)` | [ ] | |
-| `isEnabled(selector, options)` | [ ] | |
-| `isHidden(selector, options)` | [ ] | |
-| `isVisible(selector, options)` | [ ] | |
+| `inputValue(selector, options)` | [x] | |
+| `isChecked(selector, options)` | [x] | |
+| `isDisabled(selector, options)` | [x] | |
+| `isEditable(selector, options)` | [x] | |
+| `isEnabled(selector, options)` | [x] | |
+| `isHidden(selector, options)` | [x] | |
+| `isVisible(selector, options)` | [x] | |
 | `waitForSelector(selector, options)` | [x] | |
 
 ### JavaScript Evaluation
@@ -632,7 +632,7 @@ These modules exist but have no implemented methods (all commented out):
 4. ~~`Tracing` module~~ DONE
 
 ### Phase 5: Completeness
-1. Remaining Page query methods
+1. ~~Remaining Page query methods~~ DONE
 2. `FileChooser` module
 3. `Clock` module
 4. `Video` module

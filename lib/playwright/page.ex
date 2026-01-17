@@ -879,6 +879,51 @@ defmodule Playwright.Page do
     main_frame(page) |> Frame.text_content(selector, options)
   end
 
+  @spec inner_text(t(), binary(), map()) :: binary()
+  def inner_text(%Page{} = page, selector, options \\ %{}) do
+    main_frame(page) |> Frame.inner_text(selector, options)
+  end
+
+  @spec inner_html(t(), binary(), map()) :: binary()
+  def inner_html(%Page{} = page, selector, options \\ %{}) do
+    main_frame(page) |> Frame.inner_html(selector, options)
+  end
+
+  @spec input_value(t(), binary(), map()) :: binary()
+  def input_value(%Page{} = page, selector, options \\ %{}) do
+    main_frame(page) |> Frame.input_value(selector, options)
+  end
+
+  @spec is_checked(t(), binary(), map()) :: boolean()
+  def is_checked(%Page{} = page, selector, options \\ %{}) do
+    main_frame(page) |> Frame.is_checked(selector, options)
+  end
+
+  @spec is_disabled(t(), binary(), map()) :: boolean()
+  def is_disabled(%Page{} = page, selector, options \\ %{}) do
+    main_frame(page) |> Frame.is_disabled(selector, options)
+  end
+
+  @spec is_editable(t(), binary(), map()) :: boolean()
+  def is_editable(%Page{} = page, selector, options \\ %{}) do
+    main_frame(page) |> Frame.is_editable(selector, options)
+  end
+
+  @spec is_enabled(t(), binary(), map()) :: boolean()
+  def is_enabled(%Page{} = page, selector, options \\ %{}) do
+    main_frame(page) |> Frame.is_enabled(selector, options)
+  end
+
+  @spec is_hidden(t(), binary(), map()) :: boolean()
+  def is_hidden(%Page{} = page, selector, options \\ %{}) do
+    main_frame(page) |> Frame.is_hidden(selector, options)
+  end
+
+  @spec is_visible(t(), binary(), map()) :: boolean()
+  def is_visible(%Page{} = page, selector, options \\ %{}) do
+    main_frame(page) |> Frame.is_visible(selector, options)
+  end
+
   @spec title(t()) :: binary()
   def title(%Page{} = page) do
     main_frame(page) |> Frame.title()

@@ -673,7 +673,7 @@ defmodule Playwright.LocatorTest do
     end
 
     test "raises an error when the given locators don't share a frame", %{page: page, browser: browser} do
-      other_page = Playwright.Browser.new_page(browser)
+      {:ok, other_page} = Playwright.Browser.new_page(browser)
 
       on_exit(:ok, fn ->
         Playwright.Page.close(other_page)

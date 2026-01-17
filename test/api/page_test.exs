@@ -79,7 +79,7 @@ defmodule Playwright.PageTest do
   describe "Page.on/3" do
     @tag exclude: [:page]
     test "on :close (atom)", %{browser: browser} do
-      page = Browser.new_page(browser)
+      {:ok, page} = Browser.new_page(browser)
       this = self()
       guid = page.guid
 
@@ -93,7 +93,7 @@ defmodule Playwright.PageTest do
 
     @tag exclude: [:page]
     test "on 'close' (string)", %{browser: browser} do
-      page = Browser.new_page(browser)
+      {:ok, page} = Browser.new_page(browser)
       this = self()
       guid = page.guid
 
@@ -111,8 +111,8 @@ defmodule Playwright.PageTest do
     test "on 'close' of one Page does not affect another", %{browser: browser} do
       this = self()
 
-      %{guid: guid_one} = page_one = Browser.new_page(browser)
-      %{guid: guid_two} = page_two = Browser.new_page(browser)
+      {:ok, %{guid: guid_one} = page_one} = Browser.new_page(browser)
+      {:ok, %{guid: guid_two} = page_two} = Browser.new_page(browser)
 
       Page.on(page_one, "close", fn %{target: target} ->
         send(this, target.guid)
@@ -351,7 +351,7 @@ defmodule Playwright.PageTest do
   describe "Page.close/1" do
     @tag without: [:page]
     test "removes the Page", %{browser: browser} do
-      page = Browser.new_page(browser)
+      {:ok, page} = Browser.new_page(browser)
       assert %Page{} = Channel.find(page.session, {:guid, page.guid})
 
       page |> Page.close()

@@ -111,7 +111,8 @@ defmodule Playwright.SDK.ChannelOwner do
       end
 
       defp with_latest(subject, task) do
-        Channel.find(subject.session, {:guid, subject.guid}) |> task.()
+        # First call passes fresh state to task, second returns updated state
+        _ = Channel.find(subject.session, {:guid, subject.guid}) |> task.()
         Channel.find(subject.session, {:guid, subject.guid})
       end
     end
@@ -132,9 +133,8 @@ defmodule Playwright.SDK.ChannelOwner do
   defp module(%{type: type}) do
     String.to_existing_atom("Elixir.Playwright.#{type}")
   rescue
-    ArgumentError ->
-      message = "ChannelOwner of type #{inspect(type)} is not yet defined"
-      exit(message)
+    e in ArgumentError ->
+      reraise %{e | message: "ChannelOwner of type #{inspect(type)} is not yet defined"}, __STACKTRACE__
   end
 
   # ChannelOwner macros

@@ -49,6 +49,13 @@ defmodule Playwright.Page do
   @property :owned_context
   @property :routes
 
+  @valid_events ~w(
+    close console crash dialog domcontentloaded download
+    filechooser frameattached framedetached framenavigated
+    load pageerror popup request response request_finished
+    request_failed websocket worker
+  )a
+
   # ---
   # @property :coverage
   # @property :keyboard
@@ -201,13 +208,14 @@ defmodule Playwright.Page do
     # A call to `close` will remove the item from the catalog. `Catalog.find`
     # here ensures that we do not `post` a 2nd `close`.
     case Channel.find(session, {:guid, page.guid}, %{timeout: 10}) do
-      %Page{} ->
+      %Page{} = latest_page ->
         Channel.post(session, {:guid, page.guid}, :close, options)
 
         # NOTE: this *might* prefer to be done on `__dispose__`
         # ...OR, `.on(_, "close", _)`
-        if page.owned_context do
-          context(page) |> BrowserContext.close()
+        # Use latest_page to get patched owned_context field
+        if latest_page.owned_context do
+          context(latest_page) |> BrowserContext.close()
         end
 
         :ok
@@ -498,7 +506,13 @@ defmodule Playwright.Page do
   #   - worker
 
   def on(%Page{} = page, event, callback) when is_binary(event) do
-    on(page, String.to_atom(event), callback)
+    atom = String.to_atom(event)
+
+    if atom in @valid_events do
+      on(page, atom, callback)
+    else
+      {:error, %ArgumentError{message: "Invalid Page event: #{event}"}}
+    end
   end
 
   # NOTE: These events will be recv'd from Playwright server with the parent
@@ -586,7 +600,10 @@ defmodule Playwright.Page do
 
   @spec request(t()) :: Playwright.APIRequestContext.t()
   def request(%Page{session: session} = page) do
-    Channel.list(session, {:guid, page.owned_context.browser.guid}, "APIRequestContext")
+    # Fetch latest page state to get patched owned_context field
+    fresh_page = Channel.find(session, {:guid, page.guid})
+
+    Channel.list(session, {:guid, fresh_page.owned_context.browser.guid}, "APIRequestContext")
     |> List.first()
   end
 

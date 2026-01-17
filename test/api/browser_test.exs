@@ -16,10 +16,10 @@ defmodule Playwright.BrowserTest do
     test "builds a new Page, incl. context", %{browser: browser} do
       assert [] = Browser.contexts(browser)
 
-      page1 = Browser.new_page(browser)
+      {:ok, page1} = Browser.new_page(browser)
       assert [%BrowserContext{}] = Browser.contexts(browser)
 
-      page2 = Browser.new_page(browser)
+      {:ok, page2} = Browser.new_page(browser)
       assert [%BrowserContext{}, %BrowserContext{}] = Browser.contexts(browser)
 
       Page.close(page1)

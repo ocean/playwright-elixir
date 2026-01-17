@@ -149,19 +149,17 @@ defmodule Playwright.Browser do
   `Playwright.BrowserContext.new_page/2`, given the new context, to manage
   resource lifecycles.
   """
-  @spec new_page(t(), options()) :: Page.t()
+  @spec new_page(t(), options()) :: {:ok, Page.t()} | {:error, Channel.Error.t()}
   def new_page(browser, options \\ %{})
 
   def new_page(%Browser{session: session} = browser, options) do
-    context = new_context(browser, options)
-    page = BrowserContext.new_page(context)
-
-    # TODO: handle the following, for `page`:
-    # ** (KeyError) key :guid not found in: {:error, %Playwright.Channel.Error{message: "Target closed"}}
-
-    # establish co-dependency
-    Channel.patch(session, {:guid, context.guid}, %{owner_page: page})
-    Channel.patch(session, {:guid, page.guid}, %{owned_context: context})
+    with context when is_struct(context) <- new_context(browser, options),
+         page when is_struct(page) <- BrowserContext.new_page(context) do
+      # establish co-dependency
+      Channel.patch(session, {:guid, context.guid}, %{owner_page: page})
+      Channel.patch(session, {:guid, page.guid}, %{owned_context: context})
+      {:ok, page}
+    end
   end
 
   # ---

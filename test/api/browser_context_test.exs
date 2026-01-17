@@ -21,7 +21,7 @@ defmodule Playwright.BrowserContextTest do
     test "creates and binds a new context", %{browser: browser} do
       assert Browser.contexts(browser) == []
 
-      page = Browser.new_page(browser)
+      {:ok, page} = Browser.new_page(browser)
       assert [%BrowserContext{} = context] = Browser.contexts(browser)
       assert context.browser == browser
 
@@ -283,7 +283,7 @@ defmodule Playwright.BrowserContextTest do
     end
 
     test "can be set via new_page", %{browser: browser} do
-      page = Browser.new_page(browser, %{"userAgent" => "Mozzies"})
+      {:ok, page} = Browser.new_page(browser, %{"userAgent" => "Mozzies"})
 
       assert Page.evaluate(page, "window.navigator.userAgent") == "Mozzies"
 

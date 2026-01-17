@@ -405,7 +405,7 @@ This document tracks the implementation status of Playwright features in playwri
 | `waitForURL(url, options)` | [x] | |
 | `waitForLoadState(state, options)` | [x] | |
 | `url()` | [x] | |
-| `name()` | [ ] | |
+| `name()` | [x] | |
 | `title()` | [x] | |
 
 ### Content
@@ -419,10 +419,10 @@ This document tracks the implementation status of Playwright features in playwri
 
 | Method | Status | Notes |
 |--------|--------|-------|
-| `page()` | [ ] | |
-| `parentFrame()` | [ ] | |
-| `childFrames()` | [ ] | |
-| `isDetached()` | [ ] | |
+| `page()` | [x] | |
+| `parentFrame()` | [x] | |
+| `childFrames()` | [x] | |
+| `isDetached()` | [x] | |
 | `frameElement()` | [ ] | |
 | `frameLocator(selector)` | [x] | |
 

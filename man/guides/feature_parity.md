@@ -496,12 +496,12 @@ These modules exist but have no implemented methods (all commented out):
 
 | Method | Status | Notes |
 |--------|--------|-------|
-| `click(x, y, options)` | [ ] | |
-| `dblclick(x, y, options)` | [ ] | |
-| `down(options)` | [ ] | |
-| `up(options)` | [ ] | |
-| `move(x, y, options)` | [ ] | |
-| `wheel(deltaX, deltaY)` | [ ] | |
+| `click(x, y, options)` | [x] | |
+| `dblclick(x, y, options)` | [x] | |
+| `down(options)` | [x] | |
+| `up(options)` | [x] | |
+| `move(x, y, options)` | [x] | |
+| `wheel(deltaX, deltaY)` | [x] | |
 
 ### Touchscreen (`lib/playwright/page/touchscreen.ex`)
 
@@ -624,7 +624,7 @@ These modules exist but have no implemented methods (all commented out):
 3. ~~`Download.saveAs()` / `Download.path()`~~ DONE
 
 ### Phase 4: Advanced Features
-1. `Mouse` module
+1. ~~`Mouse` module~~ DONE
 2. `FrameLocator` module
 3. `Page.pdf()`
 4. `Tracing` module

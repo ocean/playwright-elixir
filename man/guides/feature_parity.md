@@ -28,8 +28,8 @@ This document tracks the implementation status of Playwright features in playwri
 | `waitForLoadState(state, options)` | [x] | |
 | `waitForNavigation(options)` | [x] | |
 | `waitForURL(url, options)` | [x] | Polling-based implementation |
-| `waitForRequest(urlOrPredicate, options)` | [ ] | |
-| `waitForResponse(urlOrPredicate, options)` | [ ] | |
+| `waitForRequest(urlOrPredicate, options)` | [x] | |
+| `waitForResponse(urlOrPredicate, options)` | [x] | |
 | `waitForEvent(event, options)` | [~] | As `expect_event` |
 | `bringToFront()` | [x] | |
 

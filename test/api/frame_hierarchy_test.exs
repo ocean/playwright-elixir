@@ -25,8 +25,12 @@ defmodule Playwright.FrameHierarchyTest do
 
     test "returns parent for iframe", %{page: page, assets: assets} do
       Page.goto(page, assets.prefix <> "/frames/one-frame.html")
+      # Wait for page to fully load including iframe
+      Page.wait_for_load_state(page, "load")
+
       frames = Page.frames(page)
-      child = Enum.find(frames, fn f -> f.url =~ "frame.html" end)
+      # Match specifically the iframe URL (ends with /frame.html, not /one-frame.html)
+      child = Enum.find(frames, fn f -> String.ends_with?(f.url, "/frame.html") end)
 
       assert child != nil
       parent = Frame.parent_frame(child)

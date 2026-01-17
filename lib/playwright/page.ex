@@ -40,7 +40,7 @@ defmodule Playwright.Page do
   """
   use Playwright.SDK.ChannelOwner
 
-  alias Playwright.{BrowserContext, ElementHandle, Frame, Page, Response}
+  alias Playwright.{BrowserContext, ElementHandle, Frame, Page, Request, Response}
   alias Playwright.SDK.{Channel, ChannelOwner, Helpers}
 
   @property :bindings
@@ -355,13 +355,96 @@ defmodule Playwright.Page do
 
   # ---
 
-  # @spec expect_request(t(), binary() | function(), options()) :: :ok
-  # def expect_request(page, url_or_predicate, options \\ %{})
-  # ...defdelegate wait_for_request
+  @doc """
+  Waits for a matching request and returns it.
 
-  # @spec expect_response(t(), binary() | function(), options()) :: :ok
-  # def expect_response(page, url_or_predicate, options \\ %{})
-  # ...defdelegate wait_for_response
+  The request can be matched by:
+  - A URL glob pattern (e.g., `"**/api/users"`)
+  - A `Regex` (e.g., `~r/\\/api\\/users$/`)
+  - A function that receives the `Request` and returns a boolean
+
+  ## Options
+
+  - `:timeout` - Maximum time in milliseconds. Defaults to 30000 (30 seconds).
+
+  ## Examples
+
+      # Wait for a request matching a glob pattern
+      request = Page.wait_for_request(page, "**/api/users", %{}, fn ->
+        Page.click(page, "button#submit")
+      end)
+
+      # Wait for a request matching a regex
+      request = Page.wait_for_request(page, ~r/\\/api\\/users$/, %{}, fn ->
+        Page.click(page, "button")
+      end)
+
+      # Wait for a request with custom predicate
+      request = Page.wait_for_request(page, fn req ->
+        req.method == "POST" and String.contains?(req.url, "/api")
+      end, %{}, fn ->
+        Page.click(page, "button")
+      end)
+  """
+  @spec wait_for_request(t(), binary() | Regex.t() | function(), options(), function() | nil) ::
+          Request.t() | {:error, term()}
+  def wait_for_request(%Page{session: session} = page, url_or_predicate, options \\ %{}, trigger \\ nil) do
+    predicate = build_request_predicate(session, url_or_predicate)
+    timeout = Map.get(options, :timeout, 30_000)
+
+    Channel.post(session, {:guid, page.guid}, :update_subscription, %{event: "request", enabled: true})
+
+    case Channel.wait(session, {:guid, context(page).guid}, :request, %{timeout: timeout, predicate: predicate}, trigger) do
+      %Playwright.SDK.Channel.Event{params: %{request: %{guid: guid}}} ->
+        Channel.find(session, {:guid, guid})
+
+      {:error, _} = error ->
+        error
+    end
+  end
+
+  @doc """
+  Waits for a matching response and returns it.
+
+  The response can be matched by:
+  - A URL glob pattern (e.g., `"**/api/users"`)
+  - A `Regex` (e.g., `~r/\\/api\\/users$/`)
+  - A function that receives the `Response` and returns a boolean
+
+  ## Options
+
+  - `:timeout` - Maximum time in milliseconds. Defaults to 30000 (30 seconds).
+
+  ## Examples
+
+      # Wait for a response matching a glob pattern
+      response = Page.wait_for_response(page, "**/api/users", %{}, fn ->
+        Page.click(page, "button#submit")
+      end)
+
+      # Wait for a response with custom predicate
+      response = Page.wait_for_response(page, fn resp ->
+        resp.status == 200 and String.contains?(resp.url, "/api")
+      end, %{}, fn ->
+        Page.click(page, "button")
+      end)
+  """
+  @spec wait_for_response(t(), binary() | Regex.t() | function(), options(), function() | nil) ::
+          Response.t() | {:error, term()}
+  def wait_for_response(%Page{session: session} = page, url_or_predicate, options \\ %{}, trigger \\ nil) do
+    predicate = build_response_predicate(session, url_or_predicate)
+    timeout = Map.get(options, :timeout, 30_000)
+
+    Channel.post(session, {:guid, page.guid}, :update_subscription, %{event: "response", enabled: true})
+
+    case Channel.wait(session, {:guid, context(page).guid}, :response, %{timeout: timeout, predicate: predicate}, trigger) do
+      %Playwright.SDK.Channel.Event{params: %{response: %{guid: guid}}} ->
+        Channel.find(session, {:guid, guid})
+
+      {:error, _} = error ->
+        error
+    end
+  end
 
   @doc """
   Adds a function called `param:name` on the `window` object of every frame in
@@ -872,6 +955,62 @@ defmodule Playwright.Page do
     case Map.pop(map, old_key) do
       {nil, map} -> map
       {value, map} -> Map.put(map, new_key, value)
+    end
+  end
+
+  defp build_request_predicate(session, predicate) when is_function(predicate) do
+    fn _resource, event ->
+      case event.params do
+        %{request: %{guid: guid}} ->
+          request = Channel.find(session, {:guid, guid})
+          predicate.(request)
+
+        _ ->
+          false
+      end
+    end
+  end
+
+  defp build_request_predicate(session, url_pattern) do
+    matcher = Helpers.URLMatcher.new(url_pattern)
+
+    fn _resource, event ->
+      case event.params do
+        %{request: %{guid: guid}} ->
+          request = Channel.find(session, {:guid, guid})
+          Helpers.URLMatcher.matches(matcher, request.url)
+
+        _ ->
+          false
+      end
+    end
+  end
+
+  defp build_response_predicate(session, predicate) when is_function(predicate) do
+    fn _resource, event ->
+      case event.params do
+        %{response: %{guid: guid}} ->
+          response = Channel.find(session, {:guid, guid})
+          predicate.(response)
+
+        _ ->
+          false
+      end
+    end
+  end
+
+  defp build_response_predicate(session, url_pattern) do
+    matcher = Helpers.URLMatcher.new(url_pattern)
+
+    fn _resource, event ->
+      case event.params do
+        %{response: %{guid: guid}} ->
+          response = Channel.find(session, {:guid, guid})
+          Helpers.URLMatcher.matches(matcher, response.url)
+
+        _ ->
+          false
+      end
     end
   end
 

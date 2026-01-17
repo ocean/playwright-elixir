@@ -40,8 +40,20 @@ defmodule Playwright.SDK.Helpers.RouteHandler do
 
   defp prepare_matcher(%URLMatcher{regex: %Regex{} = regex}) do
     %{
-      regex_source: Regex.source(regex),
-      regex_flags: Regex.opts(regex)
+      regexSource: Regex.source(regex),
+      regexFlags: regex_opts_to_flags(Regex.opts(regex))
     }
+  end
+
+  defp regex_opts_to_flags(opts) do
+    opts
+    |> Enum.map(fn
+      :caseless -> "i"
+      :multiline -> "m"
+      :dotall -> "s"
+      :unicode -> "u"
+      _ -> ""
+    end)
+    |> Enum.join()
   end
 end

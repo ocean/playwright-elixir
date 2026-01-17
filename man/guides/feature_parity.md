@@ -316,7 +316,7 @@ This document tracks the implementation status of Playwright features in playwri
 
 | Method | Status | Notes |
 |--------|--------|-------|
-| `setGeolocation(geolocation)` | [ ] | !Priority |
+| `setGeolocation(geolocation)` | [x] | |
 | `setExtraHTTPHeaders(headers)` | [ ] | |
 | `setOffline(offline)` | [x] | |
 | `setHTTPCredentials(credentials)` | [ ] | |
@@ -620,7 +620,7 @@ These modules exist but have no implemented methods (all commented out):
 
 ### Phase 3: Session & State (Testing Infrastructure)
 1. ~~`BrowserContext.storageState()`~~ DONE
-2. `BrowserContext.setGeolocation()`
+2. ~~`BrowserContext.setGeolocation()`~~ DONE
 3. `Download.saveAs()` / `Download.path()`
 
 ### Phase 4: Advanced Features

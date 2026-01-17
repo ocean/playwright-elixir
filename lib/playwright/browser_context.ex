@@ -570,9 +570,36 @@ defmodule Playwright.BrowserContext do
   # @spec set_extra_http_headers(t(), headers()) :: :ok
   # def set_extra_http_headers(context, headers)
 
-  # test_geolocation.py
-  # @spec set_geolocation(t(), geolocation()) :: :ok
-  # def set_geolocation(context, geolocation)
+  @doc """
+  Sets the geolocation for this browser context.
+
+  All pages in this context will use the overridden geolocation.
+
+  ## Parameters
+
+  - `geolocation` - A map with `:latitude`, `:longitude`, and optional `:accuracy`.
+    - `:latitude` - Latitude between -90 and 90
+    - `:longitude` - Longitude between -180 and 180
+    - `:accuracy` - Non-negative accuracy in meters (default: 0)
+
+  ## Examples
+
+      # Set geolocation to San Francisco
+      BrowserContext.set_geolocation(context, %{latitude: 37.7749, longitude: -122.4194})
+
+      # With accuracy
+      BrowserContext.set_geolocation(context, %{latitude: 37.7749, longitude: -122.4194, accuracy: 100})
+
+  ## Note
+
+  Consider also granting the 'geolocation' permission:
+
+      BrowserContext.grant_permissions(context, ["geolocation"])
+  """
+  @spec set_geolocation(t(), map()) :: :ok
+  def set_geolocation(%BrowserContext{session: session} = context, geolocation) do
+    Channel.post(session, {:guid, context.guid}, :set_geolocation, %{geolocation: geolocation})
+  end
 
   # ???
   # @spec set_http_credentials(t(), http_credentials()) :: :ok

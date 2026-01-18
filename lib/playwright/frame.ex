@@ -348,6 +348,28 @@ defmodule Playwright.Frame do
 
   # ---
 
+  @doc """
+  Drags the source element towards the target element and drops it.
+
+  ## Options
+
+    - `:force` - Bypass actionability checks. Defaults to `false`.
+    - `:trial` - Perform the drag without dropping. Useful for testing.
+    - `:steps` - Number of intermediate mouse positions. More steps = smoother drag.
+      Helpful for JS libraries (like SortableJS) that rely on mousemove events.
+    - `:source_position` - `%{x: n, y: n}` - Click position relative to source.
+    - `:target_position` - `%{x: n, y: n}` - Drop position relative to target.
+    - `:strict` - Throw if selector matches multiple elements.
+    - `:timeout` - Maximum time in milliseconds.
+
+  ## Example
+
+      # For libraries like SortableJS that need mouse events:
+      Frame.drag_and_drop(frame, "#item1", "#item2", %{
+        force: true,
+        steps: 20
+      })
+  """
   @spec drag_and_drop(Frame.t(), binary(), binary(), options()) :: Frame.t()
   def drag_and_drop(frame, source, target, options \\ %{}) do
     params = Map.merge(%{source: source, target: target}, options)

@@ -450,6 +450,27 @@ defmodule Playwright.Locator do
     Frame.dispatch_event(locator.frame, locator.selector, type, event_init, options)
   end
 
+  @doc """
+  Drags the source locator towards the target locator and drops it.
+
+  ## Options
+
+    - `:force` - Bypass actionability checks. Defaults to `false`.
+    - `:trial` - Perform the drag without dropping. Useful for testing.
+    - `:steps` - Number of intermediate mouse positions. More steps = smoother drag.
+      Helpful for JS libraries (like SortableJS) that rely on mousemove events.
+    - `:source_position` - `%{x: n, y: n}` - Click position relative to source.
+    - `:target_position` - `%{x: n, y: n}` - Drop position relative to target.
+    - `:timeout` - Maximum time in milliseconds.
+
+  ## Example
+
+      source = Page.locator(page, "#item1")
+      target = Page.locator(page, "#item2")
+
+      # For libraries like SortableJS that need mouse events:
+      Locator.drag_to(source, target, %{force: true, steps: 20})
+  """
   @spec drag_to(Locator.t(), Locator.t(), options()) :: Locator.t()
   def drag_to(source, target, options \\ %{}) do
     returning(source, fn ->

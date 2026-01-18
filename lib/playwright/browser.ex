@@ -185,13 +185,80 @@ defmodule Playwright.Browser do
 
   # ---
 
-  # test_chromium_tracing.py
-  # @spec start_tracing(t(), Page.t(), options()) :: :ok
-  # def start_tracing(browser, page \\ nil, options \\ %{})
+  @doc """
+  Start tracing for Chromium browser.
 
-  # test_chromium_tracing.py
-  # @spec stop_tracing(t()) :: binary()
-  # def stop_tracing(browser)
+  Records a trace that can be viewed in Chrome DevTools or Playwright Trace Viewer.
+
+  ## Arguments
+
+  | key/name       | type          | description                              |
+  | -------------- | ------------- | ---------------------------------------- |
+  | `page`         | `Page.t()`    | Optional page to trace (default: all)    |
+  | `:screenshots` | `boolean()`   | Capture screenshots during trace         |
+  | `:categories`  | `[binary()]`  | Trace categories to record               |
+
+  ## Returns
+
+  - `:ok`
+
+  ## Example
+
+      Browser.start_tracing(browser)
+      # ... perform actions ...
+      trace = Browser.stop_tracing(browser)
+      File.write!("trace.json", trace)
+
+  ## Note
+
+  Only supported on Chromium browsers.
+  """
+  @spec start_tracing(t(), Page.t() | nil, options()) :: :ok
+  def start_tracing(%Browser{session: session, guid: guid}, page \\ nil, options \\ %{}) do
+    params = %{}
+    params = if page, do: Map.put(params, :page, %{guid: page.guid}), else: params
+    params = if options[:screenshots], do: Map.put(params, :screenshots, options[:screenshots]), else: params
+    params = if options[:categories], do: Map.put(params, :categories, options[:categories]), else: params
+
+    Channel.post(session, {:guid, guid}, :start_tracing, params)
+    :ok
+  end
+
+  @doc """
+  Stop tracing and return the trace data.
+
+  Returns the trace data as binary which can be saved to a file.
+
+  ## Returns
+
+  - `binary()` - Trace data (JSON format, save as .json file)
+
+  ## Example
+
+      Browser.start_tracing(browser, page, %{screenshots: true})
+      Page.goto(page, "https://example.com")
+      trace = Browser.stop_tracing(browser)
+      File.write!("trace.json", trace)
+  """
+  @spec stop_tracing(t()) :: binary()
+  def stop_tracing(%Browser{session: session, guid: guid}) do
+    artifact =
+      case Channel.post(session, {:guid, guid}, :stop_tracing, %{}) do
+        %{artifact: %{guid: artifact_guid}} ->
+          Channel.find(session, {:guid, artifact_guid})
+
+        %Playwright.Artifact{} = art ->
+          art
+      end
+
+    # Save to temp file, read contents, then clean up
+    temp_path = Path.join(System.tmp_dir!(), "pw_trace_#{:erlang.unique_integer([:positive])}.json")
+    Playwright.Artifact.save_as(artifact, temp_path)
+    data = File.read!(temp_path)
+    File.rm(temp_path)
+    Playwright.Artifact.delete(artifact)
+    data
+  end
 
   # @spec version(BrowserContext.t()) :: binary
   # def version(browser)

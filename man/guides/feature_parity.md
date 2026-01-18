@@ -386,8 +386,8 @@ This document tracks the implementation status of Playwright features in playwri
 | `version` | [x] | Property |
 | `name` | [x] | Property |
 | `newBrowserCDPSession()` | [ ] | |
-| `startTracing(page, options)` | [ ] | |
-| `stopTracing()` | [ ] | |
+| `startTracing(page, options)` | [x] | Chromium only |
+| `stopTracing()` | [x] | Chromium only |
 
 ---
 

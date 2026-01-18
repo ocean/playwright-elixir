@@ -563,6 +563,29 @@ defmodule Playwright.PageTest do
     end
   end
 
+  describe "Page.set_default_timeout/2" do
+    test "sets the default timeout", %{page: page} do
+      assert :ok = Page.set_default_timeout(page, 30_000)
+    end
+  end
+
+  describe "Page.set_default_navigation_timeout/2" do
+    test "sets the default navigation timeout", %{page: page} do
+      assert :ok = Page.set_default_navigation_timeout(page, 60_000)
+    end
+  end
+
+  describe "Page.set_extra_http_headers/2" do
+    test "sets extra HTTP headers", %{page: page} do
+      assert :ok = Page.set_extra_http_headers(page, %{"X-Custom-Header" => "test-value"})
+    end
+
+    test "clears headers with empty map", %{page: page} do
+      Page.set_extra_http_headers(page, %{"X-Custom" => "value"})
+      assert :ok = Page.set_extra_http_headers(page, %{})
+    end
+  end
+
   describe "Page.viewport_size/1" do
     test "returns the current viewport size", %{page: page} do
       Page.set_viewport_size(page, %{width: 800, height: 600})

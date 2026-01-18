@@ -1246,16 +1246,124 @@ defmodule Playwright.Page do
     main_frame(page) |> Frame.set_input_files(selector, files, options)
   end
 
-  # NOTE: these 2 are good examples of functions that should `cast` instead of `call`.
-  # ...
-  # @spec set_default_navigation_timeout(t(), number()) :: nil (???)
-  # def set_default_navigation_timeout(page, timeout)
+  @doc """
+  Sets the default timeout for all page operations.
 
-  # @spec set_default_timeout(t(), number()) :: nil (???)
-  # def set_default_timeout(page, timeout)
+  This setting will change the default maximum time for all the methods
+  accepting a `timeout` option.
 
-  # @spec set_extra_http_headers(t(), map()) :: :ok
-  # def set_extra_http_headers(page, headers)
+  ## Arguments
+
+  | key/name  | type       | description                      |
+  | --------- | ---------- | -------------------------------- |
+  | `timeout` | `number()` | Maximum time in milliseconds.    |
+
+  ## Returns
+
+  - `:ok`
+
+  ## Example
+
+      Page.set_default_timeout(page, 60_000)  # 60 seconds
+  """
+  @spec set_default_timeout(t(), number()) :: :ok
+  def set_default_timeout(%Page{session: session, guid: guid}, timeout) do
+    Channel.post(session, {:guid, guid}, :set_default_timeout_no_reply, %{timeout: timeout})
+    :ok
+  end
+
+  @doc """
+  Sets the default timeout for navigation operations.
+
+  This setting will change the default maximum navigation time for the
+  following methods: `goto/3`, `go_back/2`, `go_forward/2`, `reload/2`,
+  `wait_for_navigation/3`.
+
+  ## Arguments
+
+  | key/name  | type       | description                      |
+  | --------- | ---------- | -------------------------------- |
+  | `timeout` | `number()` | Maximum time in milliseconds.    |
+
+  ## Returns
+
+  - `:ok`
+
+  ## Example
+
+      Page.set_default_navigation_timeout(page, 90_000)  # 90 seconds
+  """
+  @spec set_default_navigation_timeout(t(), number()) :: :ok
+  def set_default_navigation_timeout(%Page{session: session, guid: guid}, timeout) do
+    Channel.post(session, {:guid, guid}, :set_default_navigation_timeout_no_reply, %{timeout: timeout})
+    :ok
+  end
+
+  @doc """
+  Sets extra HTTP headers to be sent with every request.
+
+  These headers will be merged with (and override) headers set by
+  `BrowserContext.set_extra_http_headers/2`.
+
+  ## Arguments
+
+  | key/name  | type     | description                                |
+  | --------- | -------- | ------------------------------------------ |
+  | `headers` | `map()`  | Map of header names to values.             |
+
+  ## Returns
+
+  - `:ok`
+
+  ## Example
+
+      Page.set_extra_http_headers(page, %{
+        "Authorization" => "Bearer token123",
+        "X-Custom-Header" => "value"
+      })
+  """
+  @spec set_extra_http_headers(t(), map()) :: :ok
+  def set_extra_http_headers(%Page{session: session, guid: guid}, headers) when is_map(headers) do
+    header_list = Enum.map(headers, fn {name, value} -> %{name: to_string(name), value: value} end)
+    Channel.post(session, {:guid, guid}, :set_extra_http_headers, %{headers: header_list})
+    :ok
+  end
+
+  @doc """
+  Removes all routes registered with `route/4`.
+
+  ## Options
+
+  | key/name   | type       | description                                      |
+  | ---------- | ---------- | ------------------------------------------------ |
+  | `:behavior`| `binary()` | How to handle in-flight requests. One of:        |
+  |            |            | `"default"` - abort in-flight requests           |
+  |            |            | `"wait"` - wait for in-flight handlers           |
+  |            |            | `"ignoreErrors"` - ignore handler errors         |
+
+  ## Returns
+
+  - `:ok`
+
+  ## Example
+
+      # Add a route
+      Page.route(page, "**/*", fn route -> Route.abort(route) end)
+
+      # Later, remove all routes
+      Page.unroute_all(page)
+
+      # Or wait for in-flight handlers to complete
+      Page.unroute_all(page, %{behavior: "wait"})
+  """
+  @spec unroute_all(t(), map()) :: :ok
+  def unroute_all(%Page{session: session, guid: guid}, options \\ %{}) do
+    params = if options[:behavior], do: %{behavior: options[:behavior]}, else: %{}
+    Channel.post(session, {:guid, guid}, :unroute_all, params)
+    Channel.patch(session, {:guid, guid}, %{routes: []})
+    Channel.post(session, {:guid, guid}, :set_network_interception_patterns, %{patterns: []})
+    :ok
+  end
 
   # ---
 

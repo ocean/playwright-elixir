@@ -126,10 +126,10 @@ This document tracks the implementation status of Playwright features in playwri
 |--------|--------|-------|
 | `route(url, handler, options)` | [x] | |
 | `unroute(url, handler)` | [x] | |
-| `unrouteAll(options)` | [ ] | |
+| `unrouteAll(options)` | [x] | |
 | `routeFromHAR(har, options)` | [ ] | |
 | `routeWebSocket(url, handler)` | [ ] | |
-| `setExtraHTTPHeaders(headers)` | [ ] | |
+| `setExtraHTTPHeaders(headers)` | [x] | |
 
 ### Screenshots & Media
 
@@ -160,8 +160,8 @@ This document tracks the implementation status of Playwright features in playwri
 
 | Method | Status | Notes |
 |--------|--------|-------|
-| `setDefaultTimeout(timeout)` | [ ] | |
-| `setDefaultNavigationTimeout(timeout)` | [ ] | |
+| `setDefaultTimeout(timeout)` | [x] | |
+| `setDefaultNavigationTimeout(timeout)` | [x] | |
 
 ### Other
 
@@ -317,11 +317,11 @@ This document tracks the implementation status of Playwright features in playwri
 | Method | Status | Notes |
 |--------|--------|-------|
 | `setGeolocation(geolocation)` | [x] | |
-| `setExtraHTTPHeaders(headers)` | [ ] | |
+| `setExtraHTTPHeaders(headers)` | [x] | |
 | `setOffline(offline)` | [x] | |
 | `setHTTPCredentials(credentials)` | [ ] | |
-| `setDefaultTimeout(timeout)` | [ ] | |
-| `setDefaultNavigationTimeout(timeout)` | [ ] | |
+| `setDefaultTimeout(timeout)` | [x] | |
+| `setDefaultNavigationTimeout(timeout)` | [x] | |
 
 ### Scripts & Bindings
 
@@ -337,7 +337,7 @@ This document tracks the implementation status of Playwright features in playwri
 |--------|--------|-------|
 | `route(url, handler, options)` | [x] | |
 | `unroute(url, handler)` | [x] | |
-| `unrouteAll(options)` | [ ] | |
+| `unrouteAll(options)` | [x] | |
 | `routeFromHAR(har, options)` | [ ] | |
 | `routeWebSocket(url, handler)` | [ ] | |
 

@@ -272,6 +272,33 @@ defmodule Playwright.BrowserContextTest do
     end
   end
 
+  describe "BrowserContext.set_default_timeout/2" do
+    test "sets the default timeout", %{page: page} do
+      context = Page.context(page)
+      assert :ok = BrowserContext.set_default_timeout(context, 30_000)
+    end
+  end
+
+  describe "BrowserContext.set_default_navigation_timeout/2" do
+    test "sets the default navigation timeout", %{page: page} do
+      context = Page.context(page)
+      assert :ok = BrowserContext.set_default_navigation_timeout(context, 60_000)
+    end
+  end
+
+  describe "BrowserContext.set_extra_http_headers/2" do
+    test "sets extra HTTP headers", %{page: page} do
+      context = Page.context(page)
+      assert :ok = BrowserContext.set_extra_http_headers(context, %{"X-Custom" => "value"})
+    end
+
+    test "clears headers with empty map", %{page: page} do
+      context = Page.context(page)
+      BrowserContext.set_extra_http_headers(context, %{"X-Custom" => "value"})
+      assert :ok = BrowserContext.set_extra_http_headers(context, %{})
+    end
+  end
+
   describe "User Agent" do
     test "can be set via new_context", %{browser: browser} do
       context = Browser.new_context(browser, %{"userAgent" => "Mozzies"})

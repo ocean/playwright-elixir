@@ -558,18 +558,89 @@ defmodule Playwright.BrowserContext do
   # @spec service_workers(t()) :: [Playwright.Worker.t()]
   # def service_workers(context)
 
-  # test_navigation.py
-  # @spec set_default_navigation_timeout(t(), number()) :: :ok
-  # def set_default_navigation_timeout(context, timeout)
+  @doc """
+  Sets the default timeout for all context operations.
 
-  # test_navigation.py
-  # @spec set_default_timeout(t(), number()) :: :ok
-  # def set_default_timeout(context, timeout)
+  This setting will change the default maximum time for all the methods
+  accepting a `timeout` option.
 
-  # test_interception.py
-  # test_network.py
-  # @spec set_extra_http_headers(t(), headers()) :: :ok
-  # def set_extra_http_headers(context, headers)
+  ## Arguments
+
+  | key/name  | type       | description                      |
+  | --------- | ---------- | -------------------------------- |
+  | `timeout` | `number()` | Maximum time in milliseconds.    |
+
+  ## Returns
+
+  - `:ok`
+
+  ## Example
+
+      BrowserContext.set_default_timeout(context, 60_000)  # 60 seconds
+  """
+  @spec set_default_timeout(t(), number()) :: :ok
+  def set_default_timeout(%BrowserContext{session: session, guid: guid}, timeout) do
+    Channel.post(session, {:guid, guid}, :set_default_timeout_no_reply, %{timeout: timeout})
+    :ok
+  end
+
+  @doc """
+  Sets the default timeout for navigation operations.
+
+  This setting will change the default maximum navigation time for the
+  following methods and related shortcuts on page: `goto`, `go_back`,
+  `go_forward`, `reload`, `wait_for_navigation`.
+
+  ## Arguments
+
+  | key/name  | type       | description                      |
+  | --------- | ---------- | -------------------------------- |
+  | `timeout` | `number()` | Maximum time in milliseconds.    |
+
+  ## Returns
+
+  - `:ok`
+
+  ## Example
+
+      BrowserContext.set_default_navigation_timeout(context, 90_000)  # 90 seconds
+  """
+  @spec set_default_navigation_timeout(t(), number()) :: :ok
+  def set_default_navigation_timeout(%BrowserContext{session: session, guid: guid}, timeout) do
+    Channel.post(session, {:guid, guid}, :set_default_navigation_timeout_no_reply, %{timeout: timeout})
+    :ok
+  end
+
+  @doc """
+  Sets extra HTTP headers to be sent with every request.
+
+  These headers will be sent with every request initiated by any page in
+  the context. Headers set with `Page.set_extra_http_headers/2` take
+  precedence over headers set with this method.
+
+  ## Arguments
+
+  | key/name  | type     | description                                |
+  | --------- | -------- | ------------------------------------------ |
+  | `headers` | `map()`  | Map of header names to values.             |
+
+  ## Returns
+
+  - `:ok`
+
+  ## Example
+
+      BrowserContext.set_extra_http_headers(context, %{
+        "Authorization" => "Bearer token123",
+        "X-Custom-Header" => "value"
+      })
+  """
+  @spec set_extra_http_headers(t(), map()) :: :ok
+  def set_extra_http_headers(%BrowserContext{session: session, guid: guid}, headers) when is_map(headers) do
+    header_list = Enum.map(headers, fn {name, value} -> %{name: to_string(name), value: value} end)
+    Channel.post(session, {:guid, guid}, :set_extra_http_headers, %{headers: header_list})
+    :ok
+  end
 
   @doc """
   Sets the geolocation for this browser context.
@@ -668,8 +739,41 @@ defmodule Playwright.BrowserContext do
     end)
   end
 
-  # @spec unroute_all(t(), map()) :: :ok
-  # def unroute_all(context, options \\ %{})
+  @doc """
+  Removes all routes registered with `route/4`.
+
+  ## Options
+
+  | key/name   | type       | description                                      |
+  | ---------- | ---------- | ------------------------------------------------ |
+  | `:behavior`| `binary()` | How to handle in-flight requests. One of:        |
+  |            |            | `"default"` - abort in-flight requests           |
+  |            |            | `"wait"` - wait for in-flight handlers           |
+  |            |            | `"ignoreErrors"` - ignore handler errors         |
+
+  ## Returns
+
+  - `:ok`
+
+  ## Example
+
+      # Add a route
+      BrowserContext.route(context, "**/*", fn route -> Route.abort(route) end)
+
+      # Later, remove all routes
+      BrowserContext.unroute_all(context)
+
+      # Or wait for in-flight handlers to complete
+      BrowserContext.unroute_all(context, %{behavior: "wait"})
+  """
+  @spec unroute_all(t(), map()) :: :ok
+  def unroute_all(%BrowserContext{session: session, guid: guid}, options \\ %{}) do
+    params = if options[:behavior], do: %{behavior: options[:behavior]}, else: %{}
+    Channel.post(session, {:guid, guid}, :unroute_all, params)
+    Channel.patch(session, {:guid, guid}, %{routes: []})
+    Channel.post(session, {:guid, guid}, :set_network_interception_patterns, %{patterns: []})
+    :ok
+  end
 
   # @spec wait_for_event(t(), binary(), map()) :: map()
   # def wait_for_event(context, event, options \\ %{})

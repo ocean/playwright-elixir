@@ -43,7 +43,11 @@ defmodule Playwright.Artifact do
   """
   @spec cancel(t()) :: :ok | {:error, term()}
   def cancel(%__MODULE__{session: session} = artifact) do
-    Channel.post(session, {:guid, artifact.guid}, :cancel)
+    case Channel.post(session, {:guid, artifact.guid}, :cancel) do
+      {:ok, _} -> :ok
+      :ok -> :ok
+      {:error, _} = error -> error
+    end
   end
 
   @doc """
@@ -51,6 +55,10 @@ defmodule Playwright.Artifact do
   """
   @spec delete(t()) :: :ok | {:error, term()}
   def delete(%__MODULE__{session: session} = artifact) do
-    Channel.post(session, {:guid, artifact.guid}, :delete)
+    case Channel.post(session, {:guid, artifact.guid}, :delete) do
+      {:ok, _} -> :ok
+      :ok -> :ok
+      {:error, _} = error -> error
+    end
   end
 end

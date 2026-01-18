@@ -94,6 +94,13 @@ defmodule Playwright.Page do
       {:patch, %{target | viewport_size: params.viewport_size}}
     end)
 
+    Channel.bind(session, {:guid, page.guid}, :video, fn %{params: %{artifact: artifact}} ->
+      video_artifact = Channel.find(session, {:guid, artifact.guid})
+      video = Playwright.Video.new(video_artifact)
+      Playwright.Video.store(page.guid, video)
+      :ok
+    end)
+
     {:ok, %{page | bindings: %{}, routes: []}}
   end
 
@@ -1466,8 +1473,31 @@ defmodule Playwright.Page do
 
   # ---
 
-  # @spec video(t()) :: Video.t() | nil
-  # def video(page, handler \\ nil)
+  @doc """
+  Returns the video object for this page.
+
+  Returns `nil` if video recording is not enabled. Video recording is enabled
+  by passing `record_video: %{dir: path}` option when creating a browser context.
+
+  ## Returns
+
+  - `Video.t()` - The video object
+  - `nil` - If video recording is not enabled
+
+  ## Example
+
+      context = Browser.new_context(browser, %{record_video: %{dir: "/tmp/videos"}})
+      page = BrowserContext.new_page(context)
+      Page.goto(page, "https://example.com")
+      Page.close(page)
+
+      video = Page.video(page)
+      if video, do: Video.save_as(video, "recording.webm")
+  """
+  @spec video(t()) :: Playwright.Video.t() | nil
+  def video(%Page{guid: guid}), do: Playwright.Video.lookup(guid)
+
+  # ---
 
   # @spec wait_for_event(t(), binary(), map()) :: map()
   # def wait_for_event(page, event, options \\ %{})

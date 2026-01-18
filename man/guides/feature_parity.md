@@ -137,7 +137,7 @@ This document tracks the implementation status of Playwright features in playwri
 |--------|--------|-------|
 | `screenshot(options)` | [x] | |
 | `pdf(options)` | [x] | Chromium only |
-| `video()` | [ ] | |
+| `video()` | [x] | |
 | `emulateMedia(options)` | [x] | |
 
 ### Events

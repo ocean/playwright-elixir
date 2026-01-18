@@ -427,8 +427,27 @@ defmodule Playwright.Frame do
     Channel.post(session, {:guid, frame.guid}, :focus, params)
   end
 
-  # @spec frame_element(Frame.t()) :: ElementHandle.t()
-  # def frame_element(frame)
+  @doc """
+  Returns the frame element (iframe or frame) for this frame.
+
+  Returns the element handle pointing to the iframe/frame element
+  that hosts this frame in the parent document.
+
+  ## Returns
+
+  - `ElementHandle.t()` - The frame element
+  - `{:error, term()}` - If the frame is detached or is the main frame
+  """
+  @spec frame_element(t()) :: ElementHandle.t() | {:error, term()}
+  def frame_element(%Frame{session: session} = frame) do
+    case Channel.post(session, {:guid, frame.guid}, :frame_element) do
+      %ElementHandle{} = element ->
+        element
+
+      {:error, _} = error ->
+        error
+    end
+  end
 
   @doc """
   Returns a FrameLocator for a frame within this frame.

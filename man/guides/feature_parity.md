@@ -45,7 +45,7 @@ This document tracks the implementation status of Playwright features in playwri
 | `viewportSize()` | [x] | |
 | `isClosed()` | [~] | Via `is_closed` field |
 | `close(options)` | [x] | |
-| `opener()` | [ ] | |
+| `opener()` | [x] | |
 
 ### Frames
 
@@ -423,7 +423,7 @@ This document tracks the implementation status of Playwright features in playwri
 | `parentFrame()` | [x] | |
 | `childFrames()` | [x] | |
 | `isDetached()` | [x] | |
-| `frameElement()` | [ ] | |
+| `frameElement()` | [x] | |
 | `frameLocator(selector)` | [x] | |
 
 ### Locators
@@ -507,7 +507,7 @@ These modules exist but have no implemented methods (all commented out):
 
 | Method | Status | Notes |
 |--------|--------|-------|
-| `tap(x, y)` | [ ] | |
+| `tap(x, y)` | [x] | |
 
 ### Dialog (`lib/playwright/dialog.ex`)
 

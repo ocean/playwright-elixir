@@ -823,8 +823,23 @@ defmodule Playwright.Page do
   # @spec main_frame(t()) :: Frame.t()
   # def main_frame(page)
 
-  # @spec opener(t()) :: Frame.t() | nil
-  # def opener(page)
+  @doc """
+  Returns the page that opened this popup, or nil.
+
+  Popup pages are opened by `window.open()` from JavaScript or by clicking
+  a link with `target="_blank"`.
+
+  ## Returns
+
+  - `Page.t()` - The opener page
+  - `nil` - If this page was not opened as a popup
+  """
+  @spec opener(t()) :: t() | nil
+  def opener(%Page{session: session, initializer: %{opener: %{guid: guid}}}) do
+    Channel.find(session, {:guid, guid})
+  end
+
+  def opener(%Page{}), do: nil
 
   # @spec pause(t()) :: :ok
   # def pause(page)

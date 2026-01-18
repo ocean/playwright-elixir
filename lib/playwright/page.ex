@@ -505,8 +505,53 @@ defmodule Playwright.Page do
 
   # ---
 
-  # @spec frame(t(), binary()) :: Frame.t() | nil
-  # def frame(page, selector)
+  @doc """
+  Returns a frame matching the specified criteria.
+
+  ## Arguments
+
+  | key/name | type | description |
+  | -------- | ---- | ----------- |
+  | `selector` | `String.t()` or `map()` | Frame name or criteria map with `:name` or `:url` |
+
+  ## Examples
+
+      # By name (string shorthand)
+      Page.frame(page, "frame-name")
+
+      # By name (explicit)
+      Page.frame(page, %{name: "frame-name"})
+
+      # By URL - glob pattern
+      Page.frame(page, %{url: "**/frame.html"})
+
+      # By URL - regex
+      Page.frame(page, %{url: ~r/.*frame.*/})
+
+      # By URL - predicate function
+      Page.frame(page, %{url: fn url -> String.contains?(url, "frame") end})
+
+  ## Returns
+
+  - `Playwright.Frame.t()` - The matching frame
+  - `nil` - If no frame matches
+  """
+  @spec frame(t(), String.t() | map()) :: Frame.t() | nil
+  def frame(%Page{} = page, name) when is_binary(name) do
+    frame(page, %{name: name})
+  end
+
+  def frame(%Page{} = page, %{name: name}) when is_binary(name) do
+    frames(page)
+    |> Enum.find(fn f -> Frame.name(f) == name end)
+  end
+
+  def frame(%Page{} = page, %{url: url_pattern}) do
+    matcher = Helpers.URLMatcher.new(url_pattern)
+
+    frames(page)
+    |> Enum.find(fn f -> Helpers.URLMatcher.matches(matcher, Frame.url(f)) end)
+  end
 
   # ---
 

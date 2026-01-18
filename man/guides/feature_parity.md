@@ -53,7 +53,7 @@ This document tracks the implementation status of Playwright features in playwri
 |--------|--------|-------|
 | `mainFrame()` | [~] | Via `main_frame` field |
 | `frames()` | [x] | |
-| `frame(selector)` | [ ] | Get frame by name/url |
+| `frame(selector)` | [x] | Get frame by name/url |
 | `frameLocator(selector)` | [x] | |
 
 ### Locators (getBy* methods)

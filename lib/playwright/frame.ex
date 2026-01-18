@@ -46,7 +46,7 @@ defmodule Playwright.Frame do
     end)
 
     Channel.bind(session, {:guid, frame.guid}, :navigated, fn event ->
-      {:patch, %{event.target | url: event.params.url}}
+      {:patch, %{event.target | url: event.params.url, name: event.params.name || ""}}
     end)
 
     {:ok, frame}

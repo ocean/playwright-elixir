@@ -75,9 +75,9 @@ This document tracks the implementation status of Playwright features in playwri
 |--------|--------|-------|
 | `click(selector, options)` | [x] | |
 | `dblclick(selector, options)` | [x] | |
-| `tap(selector, options)` | [~] | Stubbed |
+| `tap(selector, options)` | [x] | |
 | `fill(selector, value, options)` | [x] | |
-| `type(selector, text, options)` | [ ] | Deprecated, use fill |
+| `type(selector, text, options)` | [x] | Deprecated, use fill |
 | `press(selector, key, options)` | [x] | |
 | `hover(selector, options)` | [x] | |
 | `focus(selector, options)` | [x] | |

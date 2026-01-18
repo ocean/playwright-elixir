@@ -328,6 +328,34 @@ defmodule Playwright.Page do
   end
 
   @doc """
+  Performs a tap (touch) action on the element matching the selector.
+
+  This is equivalent to `Locator.tap/2` but uses a selector string.
+  Requires the browser context to be configured with `has_touch: true`.
+  """
+  @spec tap(t(), binary(), options()) :: :ok
+  def tap(%Page{} = page, selector, options \\ %{}) do
+    main_frame(page) |> Frame.tap(selector, options)
+  end
+
+  @doc """
+  Sends a `keydown`, `keypress`/`input`, and `keyup` event for each character in the text.
+
+  **DEPRECATED**: In most cases, you should use `fill/3` instead. Use `type/4` only when
+  there is special keyboard handling on the page.
+
+  ## Options
+
+    - `:delay` - Time to wait between key presses in milliseconds. Defaults to 0.
+    - `:no_wait_after` - Do not wait for navigation after typing.
+    - `:timeout` - Maximum time in milliseconds.
+  """
+  @spec type(t(), binary(), binary(), options()) :: :ok
+  def type(%Page{} = page, selector, text, options \\ %{}) do
+    main_frame(page) |> Frame.type(selector, text, options)
+  end
+
+  @doc """
   Closes the `Page`.
 
   If the `Page` has an "owned context" (1-to-1 co-dependency with a

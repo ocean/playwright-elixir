@@ -168,6 +168,7 @@ defmodule Playwright.BrowserContext do
   @property :owner_page
   @property :routes
   @property :tracing
+  @property :websocket_routes
 
   @typedoc "Recognized cookie fields"
   @type cookie :: %{
@@ -216,7 +217,12 @@ defmodule Playwright.BrowserContext do
       # NOTE: will patch here
     end)
 
-    {:ok, %{context | bindings: %{}, browser: context.parent, routes: []}}
+    Channel.bind(session, {:guid, context.guid}, :web_socket_route, fn %{params: params, target: target} ->
+      on_web_socket_route(target, params)
+      :ok
+    end)
+
+    {:ok, %{context | bindings: %{}, browser: context.parent, routes: [], websocket_routes: []}}
   end
 
   # API
@@ -566,6 +572,43 @@ defmodule Playwright.BrowserContext do
   # def route(context, har, options \\ %{})
 
   @doc """
+  Routes WebSocket connections matching the URL pattern to the handler.
+
+  This applies to all pages within the context.
+
+  ## Example
+
+      BrowserContext.route_web_socket(context, "**/ws", fn ws ->
+        server = WebSocketRoute.connect_to_server(ws)
+
+        WebSocketRoute.on_message(ws, fn msg ->
+          IO.puts("Page -> Server: \#{msg}")
+          WebSocketRoute.Server.send(server, msg)
+        end)
+
+        WebSocketRoute.Server.on_message(server, fn msg ->
+          IO.puts("Server -> Page: \#{msg}")
+          WebSocketRoute.send(ws, msg)
+        end)
+      end)
+  """
+  @spec route_web_socket(t(), binary() | Regex.t(), (Playwright.WebSocketRoute.t() -> any())) ::
+          t() | {:error, term()}
+  def route_web_socket(%BrowserContext{session: session} = context, pattern, handler)
+      when is_function(handler, 1) do
+    with_latest(context, fn context ->
+      matcher = Helpers.URLMatcher.new(pattern)
+      ws_handler = Helpers.WebSocketRouteHandler.new(matcher, handler)
+
+      websocket_routes = [ws_handler | context.websocket_routes]
+      patterns = Helpers.WebSocketRouteHandler.prepare(websocket_routes)
+
+      Channel.patch(session, {:guid, context.guid}, %{websocket_routes: websocket_routes})
+      Channel.post(session, {:guid, context.guid}, :set_web_socket_interception_patterns, %{patterns: patterns})
+    end)
+  end
+
+  @doc """
   Returns all service workers in the context.
 
   ## Returns
@@ -860,5 +903,26 @@ defmodule Playwright.BrowserContext do
         {:cont, [handler | acc]}
       end
     end)
+  end
+
+  defp on_web_socket_route(context, %{webSocketRoute: ws_route}) do
+    # ws_route is already hydrated by Event.new
+    handle_web_socket_route(context, ws_route)
+  end
+
+  @doc false
+  # Called by Page when it has no matching handler
+  def handle_web_socket_route(context, ws_route) do
+    handler =
+      Enum.find(context.websocket_routes, fn h ->
+        Helpers.WebSocketRouteHandler.matches(h, ws_route.url)
+      end)
+
+    if handler do
+      Helpers.WebSocketRouteHandler.handle(handler, ws_route)
+    else
+      # No handler, connect through
+      Playwright.WebSocketRoute.connect_to_server(ws_route)
+    end
   end
 end

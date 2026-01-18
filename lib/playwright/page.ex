@@ -49,6 +49,7 @@ defmodule Playwright.Page do
   @property :owned_context
   @property :routes
   @property :viewport_size
+  @property :websocket_routes
 
   @valid_events ~w(
     close console crash dialog domcontentloaded download
@@ -106,7 +107,12 @@ defmodule Playwright.Page do
       :ok
     end)
 
-    {:ok, %{page | bindings: %{}, routes: []}}
+    Channel.bind(session, {:guid, page.guid}, :web_socket_route, fn %{params: params, target: target} ->
+      on_web_socket_route(target, params)
+      :ok
+    end)
+
+    {:ok, %{page | bindings: %{}, routes: [], websocket_routes: []}}
   end
 
   # API
@@ -1165,6 +1171,63 @@ defmodule Playwright.Page do
 
   # ---
 
+  @doc """
+  Routes WebSocket connections matching the URL pattern to the handler.
+
+  The handler receives a `Playwright.WebSocketRoute` that can be used to
+  intercept, mock, or modify WebSocket communication.
+
+  ## Example
+
+      # Mock all WebSocket connections
+      Page.route_web_socket(page, "**/*", fn ws ->
+        # Don't connect to server, just handle locally
+        WebSocketRoute.on_message(ws, fn msg ->
+          # Echo messages back
+          WebSocketRoute.send(ws, "Echo: \#{msg}")
+        end)
+      end)
+
+      # Proxy with logging
+      Page.route_web_socket(page, "**/ws", fn ws ->
+        server = WebSocketRoute.connect_to_server(ws)
+
+        WebSocketRoute.on_message(ws, fn msg ->
+          IO.puts("Page -> Server: \#{msg}")
+          WebSocketRoute.Server.send(server, msg)
+        end)
+
+        WebSocketRoute.Server.on_message(server, fn msg ->
+          IO.puts("Server -> Page: \#{msg}")
+          WebSocketRoute.send(ws, msg)
+        end)
+      end)
+
+  ## Arguments
+
+  | key/name  | type                     | description |
+  | --------- | ------------------------ | ----------- |
+  | `page`    | `t()`                    | The page |
+  | `pattern` | `binary()` or `Regex.t()` | URL pattern to match |
+  | `handler` | `function()`             | Handler receiving WebSocketRoute |
+  """
+  @spec route_web_socket(t(), binary() | Regex.t(), (Playwright.WebSocketRoute.t() -> any())) ::
+          t() | {:error, term()}
+  def route_web_socket(%Page{session: session} = page, pattern, handler) when is_function(handler, 1) do
+    with_latest(page, fn page ->
+      matcher = Helpers.URLMatcher.new(pattern)
+      ws_handler = Helpers.WebSocketRouteHandler.new(matcher, handler)
+
+      websocket_routes = [ws_handler | page.websocket_routes]
+      patterns = Helpers.WebSocketRouteHandler.prepare(websocket_routes)
+
+      Channel.patch(session, {:guid, page.guid}, %{websocket_routes: websocket_routes})
+      Channel.post(session, {:guid, page.guid}, :set_web_socket_interception_patterns, %{patterns: patterns})
+    end)
+  end
+
+  # ---
+
   @spec screenshot(t(), options()) :: binary()
   def screenshot(%Page{session: session} = page, options \\ %{}) do
     case Map.pop(options, :path) do
@@ -1736,5 +1799,29 @@ defmodule Playwright.Page do
         {:cont, [handler | acc]}
       end
     end)
+  end
+
+  defp on_web_socket_route(page, %{webSocketRoute: ws_route}) do
+    # ws_route is already hydrated by Event.new
+
+    # Find first matching handler
+    handler =
+      Enum.find(page.websocket_routes, fn h ->
+        Helpers.WebSocketRouteHandler.matches(h, ws_route.url)
+      end)
+
+    if handler do
+      Helpers.WebSocketRouteHandler.handle(handler, ws_route)
+    else
+      # No page handler, try context
+      context = page.owned_context || Channel.find(page.session, {:guid, page.parent.guid})
+
+      if context do
+        BrowserContext.handle_web_socket_route(context, ws_route)
+      else
+        # No handler at all, just connect through
+        Playwright.WebSocketRoute.connect_to_server(ws_route)
+      end
+    end
   end
 end

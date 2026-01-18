@@ -127,8 +127,8 @@ This document tracks the implementation status of Playwright features in playwri
 | `route(url, handler, options)` | [x] | |
 | `unroute(url, handler)` | [x] | |
 | `unrouteAll(options)` | [x] | |
-| `routeFromHAR(har, options)` | [ ] | |
-| `routeWebSocket(url, handler)` | [ ] | |
+| `routeFromHAR(har, options)` | [ ] | Requires LocalUtils |
+| `routeWebSocket(url, handler)` | [x] | |
 | `setExtraHTTPHeaders(headers)` | [x] | |
 
 ### Screenshots & Media
@@ -337,8 +337,8 @@ This document tracks the implementation status of Playwright features in playwri
 | `route(url, handler, options)` | [x] | |
 | `unroute(url, handler)` | [x] | |
 | `unrouteAll(options)` | [x] | |
-| `routeFromHAR(har, options)` | [ ] | |
-| `routeWebSocket(url, handler)` | [ ] | |
+| `routeFromHAR(har, options)` | [ ] | Requires LocalUtils |
+| `routeWebSocket(url, handler)` | [x] | |
 
 ### State
 

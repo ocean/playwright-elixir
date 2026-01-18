@@ -164,11 +164,52 @@ defmodule Playwright.Page do
   # @spec add_locator_handler(t(), Locator.t(), (Locator.t() -> any()), options()) :: :ok
   # def add_locator_handler(page, locator, func, options \\ %{})
 
-  # @spec add_script_tag(Page.t(), options()) :: ElementHandle.t()
-  # def add_script_tag(page, options \\ %{})
+  @doc """
+  Adds a `<script>` tag into the page with the desired URL or content.
 
-  # @spec add_style_tag(Page.t(), options()) :: ElementHandle.t()
-  # def add_style_tag(page, options \\ %{})
+  ## Arguments
+
+  | key/name   | type       | description                                |
+  | ---------- | ---------- | ------------------------------------------ |
+  | `:url`     | `binary()` | URL of the script to add.                  |
+  | `:content` | `binary()` | Raw JavaScript content to inject.          |
+  | `:type`    | `binary()` | Script type, e.g. "module".                |
+
+  ## Returns
+
+  - `ElementHandle.t()` - Handle to the added script element.
+
+  ## Example
+
+      Page.add_script_tag(page, %{content: "window.testValue = 42"})
+  """
+  @spec add_script_tag(t(), map()) :: ElementHandle.t()
+  def add_script_tag(%Page{} = page, options \\ %{}) do
+    main_frame(page) |> Frame.add_script_tag(options)
+  end
+
+  @doc """
+  Adds a `<style>` or `<link rel="stylesheet">` tag into the page.
+
+  ## Arguments
+
+  | key/name   | type       | description                                |
+  | ---------- | ---------- | ------------------------------------------ |
+  | `:url`     | `binary()` | URL of the stylesheet to add.              |
+  | `:content` | `binary()` | Raw CSS content to inject.                 |
+
+  ## Returns
+
+  - `ElementHandle.t()` - Handle to the added style element.
+
+  ## Example
+
+      Page.add_style_tag(page, %{content: "body { background: red; }"})
+  """
+  @spec add_style_tag(t(), map()) :: ElementHandle.t()
+  def add_style_tag(%Page{} = page, options \\ %{}) do
+    main_frame(page) |> Frame.add_style_tag(options)
+  end
 
   @doc """
   Brings the page to front (activates the tab).

@@ -117,8 +117,8 @@ This document tracks the implementation status of Playwright features in playwri
 | `exposeFunction(name, callback)` | [x] | |
 | `exposeBinding(name, callback, options)` | [x] | |
 | `addInitScript(script, arg)` | [x] | |
-| `addScriptTag(options)` | [ ] | |
-| `addStyleTag(options)` | [ ] | |
+| `addScriptTag(options)` | [x] | |
+| `addStyleTag(options)` | [x] | |
 
 ### Routing & Network
 

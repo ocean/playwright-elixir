@@ -609,4 +609,39 @@ defmodule Playwright.PageTest do
       assert :ok = Page.emulate_media(page, %{})
     end
   end
+
+  describe "Page.add_script_tag/2" do
+    test "adds a script tag with content", %{page: page} do
+      element = Page.add_script_tag(page, %{content: "window.testValue = 42"})
+      assert %ElementHandle{} = element
+      assert Page.evaluate(page, "window.testValue") == 42
+    end
+
+    test "adds a script tag with type module", %{page: page} do
+      element = Page.add_script_tag(page, %{content: "window.moduleTest = 'loaded'", type: "module"})
+      assert %ElementHandle{} = element
+    end
+  end
+
+  describe "Page.add_style_tag/2" do
+    test "adds a style tag with content", %{page: page} do
+      Page.set_content(page, ~s|<div id="target">Hello</div>|)
+      element = Page.add_style_tag(page, %{content: "#target { color: rgb(255, 0, 0); }"})
+      assert %ElementHandle{} = element
+
+      color = Page.eval_on_selector(page, "#target", "e => getComputedStyle(e).color")
+      assert color == "rgb(255, 0, 0)"
+    end
+
+    test "adds multiple style tags", %{page: page} do
+      Page.set_content(page, ~s|<div id="target">Hello</div>|)
+      Page.add_style_tag(page, %{content: "#target { color: rgb(0, 255, 0); }"})
+      Page.add_style_tag(page, %{content: "#target { background-color: rgb(0, 0, 255); }"})
+
+      color = Page.eval_on_selector(page, "#target", "e => getComputedStyle(e).color")
+      bg = Page.eval_on_selector(page, "#target", "e => getComputedStyle(e).backgroundColor")
+      assert color == "rgb(0, 255, 0)"
+      assert bg == "rgb(0, 0, 255)"
+    end
+  end
 end

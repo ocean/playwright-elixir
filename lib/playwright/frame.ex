@@ -57,11 +57,54 @@ defmodule Playwright.Frame do
 
   # ---
 
-  # @spec add_script_tag(Frame.t(), options()) :: ElementHandle.t()
-  # def add_script_tag(frame, options \\ %{})
+  @doc """
+  Adds a `<script>` tag into the page with the desired URL or content.
 
-  # @spec add_style_tag(Frame.t(), options()) :: ElementHandle.t()
-  # def add_style_tag(frame, options \\ %{})
+  ## Arguments
+
+  | key/name   | type       | description                                |
+  | ---------- | ---------- | ------------------------------------------ |
+  | `:url`     | `binary()` | URL of the script to add.                  |
+  | `:content` | `binary()` | Raw JavaScript content to inject.          |
+  | `:type`    | `binary()` | Script type, e.g. "module".                |
+
+  ## Returns
+
+  - `ElementHandle.t()` - Handle to the added script element.
+
+  ## Example
+
+      Frame.add_script_tag(frame, %{url: "https://example.com/script.js"})
+      Frame.add_script_tag(frame, %{content: "console.log('Hello!')"})
+  """
+  @spec add_script_tag(t(), map()) :: ElementHandle.t()
+  def add_script_tag(%Frame{session: session, guid: guid}, options \\ %{}) do
+    Channel.post(session, {:guid, guid}, :add_script_tag, options)
+  end
+
+  @doc """
+  Adds a `<style>` or `<link rel="stylesheet">` tag into the page.
+
+  ## Arguments
+
+  | key/name   | type       | description                                |
+  | ---------- | ---------- | ------------------------------------------ |
+  | `:url`     | `binary()` | URL of the stylesheet to add.              |
+  | `:content` | `binary()` | Raw CSS content to inject.                 |
+
+  ## Returns
+
+  - `ElementHandle.t()` - Handle to the added style element.
+
+  ## Example
+
+      Frame.add_style_tag(frame, %{url: "https://example.com/style.css"})
+      Frame.add_style_tag(frame, %{content: "body { background: red; }"})
+  """
+  @spec add_style_tag(t(), map()) :: ElementHandle.t()
+  def add_style_tag(%Frame{session: session, guid: guid}, options \\ %{}) do
+    Channel.post(session, {:guid, guid}, :add_style_tag, options)
+  end
 
   # ---
 

@@ -411,6 +411,35 @@ defmodule Playwright.Page do
     |> Frame.eval_on_selector(selector, expression, arg, options)
   end
 
+  @doc """
+  Evaluates JavaScript expression on all elements matching selector.
+
+  The expression is executed in the browser context. If the expression returns
+  a non-serializable value, the function returns `nil`.
+
+  ## Arguments
+
+  | key/name     | type       | description                              |
+  | ------------ | ---------- | ---------------------------------------- |
+  | `selector`   | `binary()` | CSS selector to match elements.          |
+  | `expression` | `binary()` | JavaScript expression to evaluate.       |
+  | `arg`        | `term()`   | Optional argument to pass to expression. |
+
+  ## Returns
+
+  - Result of the JavaScript expression.
+
+  ## Example
+
+      # Get all link hrefs
+      hrefs = Page.eval_on_selector_all(page, "a", "elements => elements.map(e => e.href)")
+  """
+  @spec eval_on_selector_all(t(), binary(), binary(), term()) :: term()
+  def eval_on_selector_all(%Page{} = page, selector, expression, arg \\ nil) do
+    main_frame(page)
+    |> Frame.eval_on_selector_all(selector, expression, arg)
+  end
+
   @spec evaluate(t(), expression(), any()) :: serializable()
   def evaluate(page, expression, arg \\ nil)
 

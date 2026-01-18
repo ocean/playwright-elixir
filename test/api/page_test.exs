@@ -416,6 +416,20 @@ defmodule Playwright.PageTest do
     end
   end
 
+  describe "Page.eval_on_selector_all/4" do
+    test "evaluates on all matching elements", %{page: page} do
+      Page.set_content(page, "<div class='item'>A</div><div class='item'>B</div><div class='item'>C</div>")
+      result = Page.eval_on_selector_all(page, ".item", "elements => elements.map(e => e.textContent)")
+      assert result == ["A", "B", "C"]
+    end
+
+    test "returns empty array when no matches", %{page: page} do
+      Page.set_content(page, "<div>Hello</div>")
+      result = Page.eval_on_selector_all(page, ".nonexistent", "elements => elements.length")
+      assert result == 0
+    end
+  end
+
   describe "Page.fill/3" do
     test "sets text content", %{assets: assets, page: page} do
       page

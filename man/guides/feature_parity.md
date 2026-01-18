@@ -113,7 +113,7 @@ This document tracks the implementation status of Playwright features in playwri
 | `evaluate(expression, arg)` | [x] | |
 | `evaluateHandle(expression, arg)` | [x] | |
 | `evalOnSelector(selector, expression, arg)` | [x] | |
-| `evalOnSelectorAll(selector, expression, arg)` | [ ] | |
+| `evalOnSelectorAll(selector, expression, arg)` | [x] | |
 | `exposeFunction(name, callback)` | [x] | |
 | `exposeBinding(name, callback, options)` | [x] | |
 | `addInitScript(script, arg)` | [x] | |

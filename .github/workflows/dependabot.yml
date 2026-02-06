@@ -2,8 +2,8 @@ name: Dependabot Check
 
 on:
   schedule:
-    - cron: '0 0 * * 0'  # Weekly on Sunday at midnight UTC
-  workflow_dispatch:     # Allow manual triggering
+    - cron: "0 0 * * 0" # Weekly on Sunday at midnight UTC
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   dependabot:
@@ -11,28 +11,28 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
+
       - name: Set up Elixir
         uses: erlef/setup-beam@v1
         with:
-          elixir-version: '1.18.4'
-          otp-version: '27.3.4.6'
-      
+          elixir-version: "1.19.x"
+          otp-version: "28.x"
+
       - name: Install Elixir dependencies
         run: mix deps.get
-      
+
       - name: Check for outdated Elixir packages
         run: mix deps.outdated
-      
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '22'
-      
+          node-version: "22"
+
       - name: Check for outdated Node.js packages
         working-directory: priv/static
         run: npm outdated || true
-      
+
       - name: Check GitHub Actions versions
         run: |
           echo "Checking for outdated GitHub Actions..."

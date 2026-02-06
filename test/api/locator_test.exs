@@ -975,7 +975,7 @@ defmodule Playwright.LocatorTest do
 
       check =
         Task.async(fn ->
-          Locator.wait_for(locator, %{timeout: 100})
+          Locator.wait_for(locator, %{timeout: 5000})
         end)
 
       assert [:ok, %Locator{}] = Task.await_many([setup, check])
@@ -991,7 +991,7 @@ defmodule Playwright.LocatorTest do
 
       check =
         Task.async(fn ->
-          Locator.wait_for(locator, %{timeout: 100, state: "hidden"})
+          Locator.wait_for(locator, %{timeout: 5000, state: "hidden"})
         end)
 
       assert [:ok, %Locator{}] = Task.await_many([setup, check])

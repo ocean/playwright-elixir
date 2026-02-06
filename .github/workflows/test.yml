@@ -1,0 +1,48 @@
+name: Test & Security
+
+on:
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    name: Tests & Security Checks
+    runs-on: ubuntu-latest
+    env:
+      MIX_ENV: test
+      PLAYWRIGHT_TRANSPORT: driver
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Elixir
+        uses: erlef/setup-beam@v1
+        with:
+          elixir-version: '1.18.4'
+          otp-version: '27.3.4.6'
+      
+      - name: Cache Elixir dependencies
+        uses: actions/cache@v4
+        with:
+          path: deps
+          key: ${{ runner.os }}-mix-${{ hashFiles('**/mix.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-mix-
+      
+      - name: Install Elixir dependencies
+        run: mix deps.get
+      
+      - name: Check code formatting
+        run: mix format --check-formatted
+      
+      - name: Run Credo (linter)
+        run: mix credo --strict
+      
+      - name: Install Playwright dependencies
+        run: mix playwright.install
+      
+      - name: Run tests
+        run: mix test
+      
+      - name: Check for security vulnerabilities
+        run: mix deps.audit

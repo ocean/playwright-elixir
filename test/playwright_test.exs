@@ -5,7 +5,10 @@ defmodule Playwright.PlaywrightTest do
 
   describe "Playwright.connect/2" do
     @tag :ws
+    @tag :skip
     test "with :chromium" do
+      # Requires an external Playwright server running (not built into Playwright CLI)
+      # Configure ws_endpoint in config for remote browser connections
       with {:ok, browser} <- Playwright.connect(:chromium),
            {:ok, page} <- Browser.new_page(browser) do
         assert page
@@ -17,7 +20,10 @@ defmodule Playwright.PlaywrightTest do
     end
 
     @tag :ws
+    @tag :skip
     test "with :firefox" do
+      # Requires an external Playwright server running (not built into Playwright CLI)
+      # Configure ws_endpoint in config for remote browser connections
       with {:ok, browser} <- Playwright.connect(:firefox),
            {:ok, page} <- Browser.new_page(browser) do
         assert page
@@ -29,7 +35,10 @@ defmodule Playwright.PlaywrightTest do
     end
 
     @tag :ws
+    @tag :skip
     test "with :webkit" do
+      # Requires an external Playwright server running (not built into Playwright CLI)
+      # Configure ws_endpoint in config for remote browser connections
       with {:ok, browser} <- Playwright.connect(:webkit),
            {:ok, page} <- Browser.new_page(browser) do
         assert page

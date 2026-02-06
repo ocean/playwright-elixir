@@ -51,15 +51,8 @@ jobs:
       - name: Install Playwright dependencies
         run: mix playwright.install
       
-      - name: Start Playwright server
-        working-directory: priv/static
-        run: |
-          npx playwright server --port 3000 &
-          sleep 2
-        timeout-minutes: 1
-      
       - name: Run tests
-        run: mix test --include ws
+        run: mix test
       
       - name: Check for security vulnerabilities
         run: mix deps.audit

@@ -822,7 +822,7 @@ defmodule Playwright.LocatorTest do
       page |> Page.goto(assets.prefix <> "/grid.html")
 
       data = Locator.screenshot(locator)
-      
+
       # Verify that we got a PNG screenshot
       # PNG files start with the magic bytes: 89 50 4E 47
       assert byte_size(data) > 100
@@ -1043,7 +1043,7 @@ defmodule Playwright.LocatorTest do
     test "returns the page containing the locator", %{page: page} do
       locator = Locator.new(page, "div")
       result = Locator.page(locator)
-      
+
       # Verify that we got a page object with a valid GUID
       assert is_struct(result, Playwright.Page)
       assert is_binary(result.guid)

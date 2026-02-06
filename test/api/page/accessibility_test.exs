@@ -7,7 +7,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<button>Click me</button>")
       locator = Page.locator(page, "button")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "button")
       assert String.contains?(snapshot, "Click me")
@@ -17,7 +17,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<input placeholder='Enter text' title='My Input' />")
       locator = Page.locator(page, "input")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "textbox")
     end
@@ -26,7 +26,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<h1>My Heading</h1>")
       locator = Page.locator(page, "h1")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "heading")
       assert String.contains?(snapshot, "My Heading")
@@ -36,7 +36,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<div>Hello World</div>")
       locator = Page.locator(page, "div")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "Hello World")
     end
@@ -49,10 +49,10 @@ defmodule Playwright.Page.AccessibilityTest do
         <button type="submit">Submit</button>
       </form>
       """)
-      
+
       locator = Page.locator(page, "form")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "Submit")
     end
@@ -61,7 +61,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<p aria-roledescription='custom role'>Content</p>")
       locator = Page.locator(page, "p")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -69,7 +69,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<div role='textbox' aria-autocomplete='list'>Autocomplete field</div>")
       locator = Page.locator(page, "div")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "textbox")
     end
@@ -78,7 +78,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<input type='text' readonly value='read-only' />")
       locator = Page.locator(page, "input")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -86,7 +86,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<input type='text' disabled />")
       locator = Page.locator(page, "input")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -97,10 +97,10 @@ defmodule Playwright.Page.AccessibilityTest do
         <div role="tab">Tab 2</div>
       </div>
       """)
-      
+
       locator = Page.locator(page, "div[role='tablist']")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "tab")
     end
@@ -112,10 +112,10 @@ defmodule Playwright.Page.AccessibilityTest do
         <div role="menuitem">Second Item</div>
       </div>
       """)
-      
+
       locator = Page.locator(page, "div[role='menu']")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "menu")
     end
@@ -124,7 +124,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<div contenteditable='plaintext-only'>Editable text</div>")
       locator = Page.locator(page, "div")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -133,10 +133,10 @@ defmodule Playwright.Page.AccessibilityTest do
       <div>Visible</div>
       <div aria-hidden="true">Hidden</div>
       """)
-      
+
       locator = Page.locator(page, "div:first-child")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "Visible")
     end
@@ -145,7 +145,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<button aria-label='Close dialog'>✕</button>")
       locator = Page.locator(page, "button")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "Close dialog")
     end
@@ -155,10 +155,10 @@ defmodule Playwright.Page.AccessibilityTest do
       <div id="description">This is a description</div>
       <input aria-describedby="description" />
       """)
-      
+
       locator = Page.locator(page, "input")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -168,10 +168,10 @@ defmodule Playwright.Page.AccessibilityTest do
         Accept terms
       </div>
       """)
-      
+
       locator = Page.locator(page, "div[role='checkbox']")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "checkbox")
     end
@@ -180,7 +180,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<a href='' role='slider' aria-orientation='vertical' aria-label='Volume'>20</a>")
       locator = Page.locator(page, "a")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -188,7 +188,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<div role='grid' aria-multiselectable='true'>Grid</div>")
       locator = Page.locator(page, "div[role='grid']")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -196,7 +196,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<div role='menuitem' aria-keyshortcuts='Alt+S'>Save</div>")
       locator = Page.locator(page, "div[role='menuitem']")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -208,10 +208,10 @@ defmodule Playwright.Page.AccessibilityTest do
         <li>Item 3</li>
       </ul>
       """)
-      
+
       locator = Page.locator(page, "ul")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -223,10 +223,10 @@ defmodule Playwright.Page.AccessibilityTest do
         <button>Action</button>
       </div>
       """)
-      
+
       locator = Page.locator(page, "div")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "Title")
     end
@@ -235,7 +235,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<div></div>")
       locator = Page.locator(page, "div")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -243,7 +243,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<button data-test='my-button'>Click</button>")
       locator = Page.locator(page, "button")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "button")
       assert String.contains?(snapshot, "Click")
@@ -260,10 +260,10 @@ defmodule Playwright.Page.AccessibilityTest do
         </body>
       </html>
       """)
-      
+
       locator = Page.locator(page, "body")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "Main Title")
     end
@@ -272,7 +272,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>")
       locator = Page.locator(page, "p")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -280,7 +280,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<img src='test.jpg' alt='Test image description' />")
       locator = Page.locator(page, "img")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -288,7 +288,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<a href='https://example.com'>Click here</a>")
       locator = Page.locator(page, "a")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
       assert String.contains?(snapshot, "link")
     end
@@ -300,10 +300,10 @@ defmodule Playwright.Page.AccessibilityTest do
         <option>Option 2</option>
       </select>
       """)
-      
+
       locator = Page.locator(page, "select")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
 
@@ -311,7 +311,7 @@ defmodule Playwright.Page.AccessibilityTest do
       Page.set_content(page, "<textarea placeholder='Enter text'></textarea>")
       locator = Page.locator(page, "textarea")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       assert is_binary(snapshot)
     end
   end
@@ -324,10 +324,10 @@ defmodule Playwright.Page.AccessibilityTest do
         <p>This is a paragraph</p>
       </div>
       """)
-      
+
       locator = Page.locator(page, "div")
       snapshot = Locator.aria_snapshot(locator)
-      
+
       # ARIA snapshots are returned as YAML strings
       assert is_binary(snapshot)
       assert String.length(snapshot) > 0

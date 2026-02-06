@@ -110,8 +110,7 @@ defmodule Playwright.Page.Accessibility do
   @spec snapshot(Page.t(), options()) :: no_return()
   def snapshot(%Page{}, _options) do
     raise "Page.Accessibility.snapshot/2 has been removed in Playwright v1.26+. " <>
-          "Use Locator.aria_snapshot/2 instead. " <>
-          "See https://playwright.dev/docs/aria-snapshots"
+            "Use Locator.aria_snapshot/2 instead. " <>
+            "See https://playwright.dev/docs/aria-snapshots"
   end
-
 end

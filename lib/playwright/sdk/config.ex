@@ -219,19 +219,19 @@ defmodule Playwright.SDK.Config do
     end
 
     defmodule LaunchOptions do
-       @moduledoc false
-       defstruct [
-         :args,
-         :channel,
-         :chromium_sandbox,
-         :devtools,
-         :downloads_path,
-         :executable_path,
-         :headless,
-         :driver_path,
-         :timeout
-       ]
-     end
+      @moduledoc false
+      defstruct [
+        :args,
+        :channel,
+        :chromium_sandbox,
+        :devtools,
+        :downloads_path,
+        :executable_path,
+        :headless,
+        :driver_path,
+        :timeout
+      ]
+    end
 
     defmodule PlaywrightTest do
       @moduledoc false

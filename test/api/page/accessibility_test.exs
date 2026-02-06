@@ -1,6 +1,6 @@
 defmodule Playwright.Page.AccessibilityTest do
   use Playwright.TestCase, async: true
-  alias Playwright.{Page, Locator}
+  alias Playwright.{Locator, Page}
 
   describe "ARIA snapshots - replaces deprecated Page.Accessibility.snapshot" do
     test "basic button snapshot", %{page: page} do

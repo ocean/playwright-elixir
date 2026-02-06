@@ -32,7 +32,7 @@ defmodule Playwright.Page.Accessibility do
   - [Deprecation Issue](https://github.com/microsoft/playwright/issues/16159)
   """
 
-  alias Playwright.{Page, ElementHandle}
+  alias Playwright.{ElementHandle, Page}
 
   @typedoc """
   Options given to `snapshot/2`

@@ -29,11 +29,13 @@ defmodule Playwright.SDK.Channel do
 
   def post(session, {:guid, guid}, action, params \\ %{}) when is_binary(guid) when is_pid(session) do
     connection = Session.connection(session)
-    message = Message.new(guid, action, params)
+    # Ensure timeout is present in params for server-side validation
+    params_with_timeout = Map.put_new(params, :timeout, 30_000)
+    message = Message.new(guid, action, params_with_timeout)
 
     # IO.inspect(message, label: "---> Channel.post/4")
 
-    with_timeout(params, fn timeout ->
+    with_timeout(params_with_timeout, fn timeout ->
       case Connection.post(connection, message, timeout) do
         {:ok, %{id: _} = result} ->
           {:ok, result}

@@ -17,7 +17,6 @@ defmodule Playwright.MixProject do
       elixirc_paths: elixirc_paths(Mix.env()),
       homepage_url: @source_url,
       package: package(),
-      preferred_cli_env: [credo: :test, dialyzer: :test, docs: :docs, precommit: :test],
       source_url: @source_url,
       start_permanent: Mix.env() == :prod,
       version: "1.49.1-alpha.2"
@@ -30,6 +29,10 @@ defmodule Playwright.MixProject do
       mod: {Playwright.Application, []},
       extra_applications: [:logger]
     ]
+  end
+
+  def cli do
+    [preferred_envs: [credo: :test, dialyzer: :test, docs: :docs, precommit: :test]]
   end
 
   defp dialyzer do

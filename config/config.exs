@@ -5,6 +5,7 @@ config :playwright, ConnectOptions, ws_endpoint: System.get_env("PLAYWRIGHT_ENDP
 config :playwright, LaunchOptions,
   channel: System.get_env("PLAYWRIGHT_CHANNEL", nil),
   headless: String.to_atom(System.get_env("PLAYWRIGHT_HEADLESS", "true")) != false,
+  timeout: String.to_integer(System.get_env("PLAYWRIGHT_LAUNCH_TIMEOUT", "30000")),
   playwright_cli_path: Path.expand("../priv/static/driver.js", __DIR__)
 
 config :playwright, PlaywrightTest, transport: String.to_atom(System.get_env("PLAYWRIGHT_TRANSPORT", "driver"))

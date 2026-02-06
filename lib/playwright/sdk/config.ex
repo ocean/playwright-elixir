@@ -201,7 +201,8 @@ defmodule Playwright.SDK.Config do
           env: any(),
           executable_path: String.t(),
           headless: boolean(),
-          driver_path: String.t()
+          driver_path: String.t(),
+          timeout: integer()
         }
 
   @typedoc false
@@ -227,7 +228,8 @@ defmodule Playwright.SDK.Config do
         :downloads_path,
         :executable_path,
         :headless,
-        :driver_path
+        :driver_path,
+        :timeout
       ]
     end
 

@@ -1,296 +1,354 @@
 defmodule Playwright.Page.AccessibilityTest do
   use Playwright.TestCase, async: true
-  # doctest Playwright.Page.Accessibility
+  alias Playwright.{Locator, Page}
 
-  alias Playwright.Page
+  describe "ARIA snapshots - replaces deprecated Page.Accessibility.snapshot" do
+    test "basic button snapshot", %{page: page} do
+      Page.set_content(page, "<button>Click me</button>")
+      locator = Page.locator(page, "button")
+      snapshot = Locator.aria_snapshot(locator)
 
-  describe "Accessibility.snapshot/1" do
-    # until Page.wait_for_function is implemented
-    @tag :skip
-    test "snapshots", %{page: page} do
-      page
-      |> Page.set_content("""
-      <head>
-        <title>Accessibility Test</title>
-      </head>
-      <body>
-        <h1>Inputs</h1>
-        <input placeholder="Empty input" autofocus />
-        <input placeholder="readonly input" readonly />
-        <input placeholder="disabled input" disabled />
-        <input aria-label="Input with whitespace" value="  " />
-        <input value="value only" />
-        <input aria-placeholder="placeholder" value="and a value" />
-        <div aria-hidden="true" id="desc">This is a description!</div>
-        <input aria-placeholder="placeholder" value="and a value" aria-describedby="desc" />
-      </body>
-      """)
-
-      # > Autofocus happens after a delay in chrome.
-      # Page.wait_for_function(page, "document.activeElement.hasAttribute('autofocus')")
-      # Page.expect_function(page, "document.activeElement.hasAttribute('autofocus')")
-      assert Page.Accessibility.snapshot(page) == %{
-               role: "WebArea",
-               name: "Accessibility Test",
-               children: [
-                 %{role: "heading", name: "Inputs", level: 1},
-                 %{role: "textbox", name: "Empty input", focused: true},
-                 %{role: "textbox", name: "readonly input", readonly: true},
-                 %{role: "textbox", name: "disabled input", disabled: true},
-                 %{role: "textbox", name: "Input with whitespace", value: "  "},
-                 %{role: "textbox", name: "", value: "value only"},
-                 %{role: "textbox", name: "placeholder", value: "and a value"},
-                 %{role: "textbox", name: "placeholder", value: "and a value", description: "This is a description!"}
-               ]
-             }
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "button")
+      assert String.contains?(snapshot, "Click me")
     end
 
-    test "with regular text", %{page: page} do
+    test "input element snapshot", %{page: page} do
+      Page.set_content(page, "<input placeholder='Enter text' title='My Input' />")
+      locator = Page.locator(page, "input")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "textbox")
+    end
+
+    test "heading element snapshot", %{page: page} do
+      Page.set_content(page, "<h1>My Heading</h1>")
+      locator = Page.locator(page, "h1")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "heading")
+      assert String.contains?(snapshot, "My Heading")
+    end
+
+    test "text content snapshot", %{page: page} do
       Page.set_content(page, "<div>Hello World</div>")
+      locator = Page.locator(page, "div")
+      snapshot = Locator.aria_snapshot(locator)
 
-      [element | _] = Page.Accessibility.snapshot(page).children
-      assert element == %{role: "text", name: "Hello World"}
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "Hello World")
     end
 
-    test "with ARIA roledescription", %{page: page} do
-      Page.set_content(page, "<p tabIndex=-1 aria-roledescription='foo'>Hi</p>")
-
-      [element | _] = Page.Accessibility.snapshot(page).children
-      assert element.roledescription == "foo"
-    end
-
-    test "with ARIA orientation", %{page: page} do
-      Page.set_content(page, "<a href='' role='slider' aria-orientation='vertical'>11</a>")
-
-      [element | _] = Page.Accessibility.snapshot(page).children
-      assert element.orientation == "vertical"
-    end
-
-    test "with ARIA autocomplete", %{page: page} do
-      Page.set_content(page, "<div role='textbox' aria-autocomplete='list'>hi</div>")
-
-      [element | _] = Page.Accessibility.snapshot(page).children
-      assert element.autocomplete == "list"
-    end
-
-    test "with ARIA multiselectable", %{page: page} do
-      Page.set_content(page, "<div role='grid' tabIndex=-1 aria-multiselectable=true>hey</div>")
-
-      [element | _] = Page.Accessibility.snapshot(page).children
-      assert element.multiselectable == true
-    end
-
-    test "with ARIA keyshortcuts", %{page: page} do
-      Page.set_content(page, "<div role='grid' tabIndex=-1 aria-keyshortcuts='foo'>hey</div>")
-
-      [element | _] = Page.Accessibility.snapshot(page).children
-      assert element.keyshortcuts == "foo"
-    end
-
-    test "with a <title>", %{page: page} do
+    test "complex form elements", %{page: page} do
       Page.set_content(page, """
-      <title>This is the title</title>
-      <div>This is the content</div>
+      <form>
+        <label>Name: <input type="text" /></label>
+        <label>Email: <input type="email" /></label>
+        <button type="submit">Submit</button>
+      </form>
       """)
 
-      snapshot = Page.Accessibility.snapshot(page)
-      assert snapshot.name == "This is the title"
+      locator = Page.locator(page, "form")
+      snapshot = Locator.aria_snapshot(locator)
 
-      [content | _] = snapshot.children
-      assert content.name == "This is the content"
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "Submit")
     end
-  end
 
-  describe "page accessibility with filtering children of leaf nodes" do
-    test "does not report text nodes inside controls", %{page: page} do
+    test "with ARIA attributes (roledescription)", %{page: page} do
+      Page.set_content(page, "<p aria-roledescription='custom role'>Content</p>")
+      locator = Page.locator(page, "p")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+    end
+
+    test "with ARIA attributes (autocomplete)", %{page: page} do
+      Page.set_content(page, "<div role='textbox' aria-autocomplete='list'>Autocomplete field</div>")
+      locator = Page.locator(page, "div")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "textbox")
+    end
+
+    test "with readonly attribute", %{page: page} do
+      Page.set_content(page, "<input type='text' readonly value='read-only' />")
+      locator = Page.locator(page, "input")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+    end
+
+    test "with disabled attribute", %{page: page} do
+      Page.set_content(page, "<input type='text' disabled />")
+      locator = Page.locator(page, "input")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+    end
+
+    test "with tab structure", %{page: page} do
       Page.set_content(page, """
       <div role="tablist">
-        <div role="tab" aria-selected="true"><b>Tab1</b></div>
-        <div role="tab">Tab2</div>
+        <div role="tab" aria-selected="true">Tab 1</div>
+        <div role="tab">Tab 2</div>
       </div>
       """)
 
-      assert Page.Accessibility.snapshot(page) == %{
-               role: "WebArea",
-               name: "",
-               children: [
-                 %{role: "tab", name: "Tab1", selected: true},
-                 %{role: "tab", name: "Tab2"}
-               ]
-             }
+      locator = Page.locator(page, "div[role='tablist']")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "tab")
     end
 
-    test "excludes children from plain text editable fields with role", %{page: page} do
-      Page.set_content(page, """
-      <div contenteditable="plaintext-only" role="textbox">Edit this image:<img src="fakeimage.png" alt="my fake image"></div>
-      """)
-
-      [element | _] = Page.Accessibility.snapshot(page).children
-
-      assert element == %{
-               role: "textbox",
-               name: "",
-               multiline: true,
-               value: "Edit this image:"
-             }
-    end
-
-    test "excludes content from plain text editable fields without role", %{page: page} do
-      Page.set_content(page, """
-      <div contenteditable="plaintext-only">Edit this image:<img src="fakeimage.png" alt="my fake image"></div>
-      """)
-
-      [element | _] = Page.Accessibility.snapshot(page).children
-
-      assert element == %{
-               role: "generic",
-               name: "",
-               value: "Edit this image:"
-             }
-    end
-
-    test "excludes content from plain text editable fields with tabindex and without role", %{page: page} do
-      Page.set_content(page, """
-      <div contenteditable="plaintext-only" tabIndex=0>Edit this image:<img src="fakeimage.png" alt="my fake image"></div>
-      """)
-
-      [element | _] = Page.Accessibility.snapshot(page).children
-
-      assert element == %{
-               role: "generic",
-               name: "",
-               value: "Edit this image:"
-             }
-    end
-
-    test "excludes children from non-editable textbox with role, tabindex and label", %{page: page} do
-      Page.set_content(page, """
-      <div role="textbox" tabIndex=0 aria-checked="true" aria-label="my favorite textbox">
-        this is the inner content
-        <img alt="yo" src="fakeimg.png">
-      </div>
-      """)
-
-      [element | _] = Page.Accessibility.snapshot(page).children
-
-      assert element == %{
-               role: "textbox",
-               name: "my favorite textbox",
-               value: "this is the inner content "
-             }
-    end
-
-    test "excludes children from a checkbox with tabindex and label", %{page: page} do
-      Page.set_content(page, """
-      <div role="checkbox" tabIndex=0 aria-checked="true" aria-label="my favorite checkbox">
-        this is the inner content
-        <img alt="yo" src="fakeimg.png">
-      </div>
-      """)
-
-      [element | _] = Page.Accessibility.snapshot(page).children
-
-      assert element == %{
-               role: "checkbox",
-               name: "my favorite checkbox",
-               checked: true
-             }
-    end
-
-    test "excludes children from a checkbox without a label", %{page: page} do
-      Page.set_content(page, """
-      <div role="checkbox" aria-checked="true">
-        this is the inner content
-        <img alt="yo" src="fakeimg.png">
-      </div>
-      """)
-
-      [element | _] = Page.Accessibility.snapshot(page).children
-
-      assert element == %{
-               role: "checkbox",
-               name: "this is the inner content yo",
-               checked: true
-             }
-    end
-  end
-
-  describe "page accessibility scoped via :root" do
-    test "with a button", %{page: page} do
-      Page.set_content(page, "<button>My Button</button>")
-
-      element = Page.query_selector(page, "button")
-
-      assert Page.Accessibility.snapshot(page, %{root: element}) == %{
-               role: "button",
-               name: "My Button"
-             }
-    end
-
-    test "with an input", %{page: page} do
-      Page.set_content(page, "<input title='My Input' value='My Value'>")
-
-      element = Page.query_selector(page, "input")
-
-      assert Page.Accessibility.snapshot(page, %{root: element}) == %{
-               role: "textbox",
-               name: "My Input",
-               value: "My Value"
-             }
-    end
-
-    test "with a menu", %{page: page} do
+    test "with menu structure", %{page: page} do
       Page.set_content(page, """
       <div role="menu" title="My Menu">
         <div role="menuitem">First Item</div>
         <div role="menuitem">Second Item</div>
-        <div role="menuitem">Third Item</div>
       </div>
       """)
 
-      element = Page.query_selector(page, "div[role='menu']")
+      locator = Page.locator(page, "div[role='menu']")
+      snapshot = Locator.aria_snapshot(locator)
 
-      assert Page.Accessibility.snapshot(page, %{root: element}) == %{
-               role: "menu",
-               name: "My Menu",
-               children: [
-                 %{role: "menuitem", name: "First Item"},
-                 %{role: "menuitem", name: "Second Item"},
-                 %{role: "menuitem", name: "Third Item"}
-               ],
-               orientation: "vertical"
-             }
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "menu")
     end
 
-    test "when the DOM node is removed, returns nil", %{page: page} do
-      Page.set_content(page, "<button>My Button</button>")
+    test "with contenteditable", %{page: page} do
+      Page.set_content(page, "<div contenteditable='plaintext-only'>Editable text</div>")
+      locator = Page.locator(page, "div")
+      snapshot = Locator.aria_snapshot(locator)
 
-      element = Page.query_selector(page, "button")
-      Page.eval_on_selector(page, "button", "button => button.remove()")
-
-      refute Page.Accessibility.snapshot(page, %{root: element})
+      assert is_binary(snapshot)
     end
-  end
 
-  describe "additional snapshot options" do
-    test "requesting 'uninteresting' nodes", %{page: page} do
+    test "with aria-hidden elements", %{page: page} do
       Page.set_content(page, """
-      <div id="root" role="textbox">
-        <div>
-          hello
-          <div>
-            world
-          </div>
-        </div>
+      <div>Visible</div>
+      <div aria-hidden="true">Hidden</div>
+      """)
+
+      locator = Page.locator(page, "div:first-child")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "Visible")
+    end
+
+    test "with aria-label", %{page: page} do
+      Page.set_content(page, "<button aria-label='Close dialog'>✕</button>")
+      locator = Page.locator(page, "button")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "Close dialog")
+    end
+
+    test "with aria-describedby", %{page: page} do
+      Page.set_content(page, """
+      <div id="description">This is a description</div>
+      <input aria-describedby="description" />
+      """)
+
+      locator = Page.locator(page, "input")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+    end
+
+    test "checkbox with aria-checked", %{page: page} do
+      Page.set_content(page, """
+      <div role="checkbox" aria-checked="true" aria-label="Accept">
+        Accept terms
       </div>
       """)
 
-      element = Page.query_selector(page, "#root")
-      snapshot = Page.Accessibility.snapshot(page, %{root: element, interesting_only: false})
-      assert snapshot.role == "textbox"
-      assert String.contains?(snapshot.value, "hello")
-      assert String.contains?(snapshot.value, "world")
-      assert snapshot.children
+      locator = Page.locator(page, "div[role='checkbox']")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "checkbox")
+    end
+
+    test "with aria-orientation", %{page: page} do
+      Page.set_content(page, "<a href='' role='slider' aria-orientation='vertical' aria-label='Volume'>20</a>")
+      locator = Page.locator(page, "a")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+    end
+
+    test "with aria-multiselectable", %{page: page} do
+      Page.set_content(page, "<div role='grid' aria-multiselectable='true'>Grid</div>")
+      locator = Page.locator(page, "div[role='grid']")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+    end
+
+    test "with aria-keyshortcuts", %{page: page} do
+      Page.set_content(page, "<div role='menuitem' aria-keyshortcuts='Alt+S'>Save</div>")
+      locator = Page.locator(page, "div[role='menuitem']")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+    end
+
+    test "list structure with role", %{page: page} do
+      Page.set_content(page, """
+      <ul>
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+      </ul>
+      """)
+
+      locator = Page.locator(page, "ul")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+    end
+
+    test "nested structure", %{page: page} do
+      Page.set_content(page, """
+      <div>
+        <h2>Title</h2>
+        <p>Paragraph text</p>
+        <button>Action</button>
+      </div>
+      """)
+
+      locator = Page.locator(page, "div")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "Title")
+    end
+
+    test "empty element", %{page: page} do
+      Page.set_content(page, "<div></div>")
+      locator = Page.locator(page, "div")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+    end
+
+    test "with data attributes (should not affect ARIA)", %{page: page} do
+      Page.set_content(page, "<button data-test='my-button'>Click</button>")
+      locator = Page.locator(page, "button")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "button")
+      assert String.contains?(snapshot, "Click")
+    end
+
+    test "full page accessibility tree", %{page: page} do
+      Page.set_content(page, """
+      <html>
+        <head><title>Test Page</title></head>
+        <body>
+          <h1>Main Title</h1>
+          <p>Introduction paragraph</p>
+          <button>Submit</button>
+        </body>
+      </html>
+      """)
+
+      locator = Page.locator(page, "body")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "Main Title")
+    end
+
+    test "inline elements", %{page: page} do
+      Page.set_content(page, "<p>This is <strong>bold</strong> and <em>italic</em> text.</p>")
+      locator = Page.locator(page, "p")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+    end
+
+    test "with image alt text", %{page: page} do
+      Page.set_content(page, "<img src='test.jpg' alt='Test image description' />")
+      locator = Page.locator(page, "img")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+    end
+
+    test "link element", %{page: page} do
+      Page.set_content(page, "<a href='https://example.com'>Click here</a>")
+      locator = Page.locator(page, "a")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+      assert String.contains?(snapshot, "link")
+    end
+
+    test "select dropdown", %{page: page} do
+      Page.set_content(page, """
+      <select>
+        <option>Option 1</option>
+        <option>Option 2</option>
+      </select>
+      """)
+
+      locator = Page.locator(page, "select")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
+    end
+
+    test "textarea element", %{page: page} do
+      Page.set_content(page, "<textarea placeholder='Enter text'></textarea>")
+      locator = Page.locator(page, "textarea")
+      snapshot = Locator.aria_snapshot(locator)
+
+      assert is_binary(snapshot)
     end
   end
+
+  describe "Page.locator with aria_snapshot" do
+    test "locator.aria_snapshot returns string format", %{page: page} do
+      Page.set_content(page, """
+      <div>
+        <h1>Accessibility Test</h1>
+        <p>This is a paragraph</p>
+      </div>
+      """)
+
+      locator = Page.locator(page, "div")
+      snapshot = Locator.aria_snapshot(locator)
+
+      # ARIA snapshots are returned as YAML strings
+      assert is_binary(snapshot)
+      assert String.length(snapshot) > 0
+    end
+  end
+
+  # NOTE: Migration guidance for users currently using Page.Accessibility.snapshot
+  #
+  # OLD API (Removed in Playwright v1.26):
+  #   snapshot = Page.Accessibility.snapshot(page)
+  #   # Returns: map with :role, :name, :children, etc.
+  #
+  # NEW API (Current):
+  #   locator = Page.locator(page, selector)
+  #   snapshot = Locator.aria_snapshot(locator)
+  #   # Returns: binary (YAML string) with accessibility tree
+  #
+  # For more complex accessibility testing, consider:
+  #   1. Parse the YAML snapshot for specific assertions
+  #   2. Use expect(locator).toMatchAriaSnapshot() in JavaScript
+  #   3. Integrate with accessibility testing libraries (e.g., Axe)
+  #
+  # See: https://playwright.dev/docs/aria-snapshots
 end

@@ -92,7 +92,9 @@ defmodule Playwright.Page do
     end)
 
     Channel.bind(session, {:guid, page.guid}, :viewport_size_changed, fn %{params: params, target: target} ->
-      {:patch, %{target | viewport_size: params.viewport_size}}
+      # params comes in camelCase from Playwright (viewportSize)
+      viewport_size = params[:viewportSize] || params[:viewport_size]
+      {:patch, %{target | viewport_size: viewport_size}}
     end)
 
     Channel.bind(session, {:guid, page.guid}, :video, fn %{params: %{artifact: artifact}} ->
@@ -1071,6 +1073,25 @@ defmodule Playwright.Page do
   @spec page_errors(t()) :: [map()]
   def page_errors(%Page{session: session, guid: guid}) do
     Channel.post(session, {:guid, guid}, :page_errors)
+  end
+
+  @doc """
+  Returns all requests made by the page.
+
+  The list includes all requests made during the page's lifetime,
+  including those from navigation, subresources, XHR/fetch calls, etc.
+
+  Returns a list of `Playwright.Request` objects.
+
+  ## Example
+
+      Page.goto(page, "https://example.com")
+      requests = Page.requests(page)
+      IO.inspect(requests)
+  """
+  @spec requests(t()) :: [Request.t()]
+  def requests(%Page{session: session, guid: guid}) do
+    Channel.post(session, {:guid, guid}, :requests)
   end
 
   @doc """

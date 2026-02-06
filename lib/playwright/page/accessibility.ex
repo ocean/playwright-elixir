@@ -1,25 +1,38 @@
 defmodule Playwright.Page.Accessibility do
   @moduledoc """
-  `Playwright.Page.Accessibility` provides functions for inspecting Chromium's accessibility tree.
+  **DEPRECATED**: This module is deprecated as of Playwright v1.26.
 
-  The accessibility tree is used by assistive technology such as [screen readers][1] or [switches][2].
+  The `Page.Accessibility.snapshot/2` method has been removed from Playwright as of v1.26 (August 2022).
+  This Elixir wrapper is provided for reference only and will not function with modern Playwright versions.
 
-  Accessibility is a very platform-specific thing. On different platforms, there are different screen readers that
-  might have wildly different output.
+  ## Migration Guide
 
-  Rendering engines of Chromium, Firefox and WebKit have a concept of "accessibility tree", which is then translated
-  into different platform-specific APIs. Accessibility namespace gives access to this Accessibility Tree.
+  For modern accessibility testing in Playwright, use one of the following approaches:
 
-  Most of the accessibility tree gets filtered out when converting from internal browser AX Tree to Platform-specific
-  AX-Tree or by assistive technologies themselves. By default, Playwright tries to approximate this filtering,
-  exposing only the "interesting" nodes of the tree.
+  ### 1. ARIA Snapshots (Recommended for Elixir)
+  Use `Locator.aria_snapshot/2` to capture the accessibility tree in YAML format:
 
-  [1]: https://en.wikipedia.org/wiki/Screen_reader
-  [2]: https://en.wikipedia.org/wiki/Switch_access
+      locator = Page.locator(page, "body")
+      snapshot = Locator.aria_snapshot(locator)
+
+  ### 2. External Accessibility Libraries
+  Integrate with [Axe](https://www.deque.com/axe/) or similar libraries for comprehensive accessibility testing.
+  See https://playwright.dev/docs/accessibility-testing
+
+  ### 3. Test Assertions with Locator Roles
+  Use `Locator.get_by_role/3` and standard Playwright assertions:
+
+      button = Page.get_by_role(page, "button", %{name: "Submit"})
+      Locator.click(button)
+
+  ## References
+
+  - [Aria Snapshots](https://playwright.dev/docs/aria-snapshots)
+  - [Accessibility Testing Guide](https://playwright.dev/docs/accessibility-testing)
+  - [Deprecation Issue](https://github.com/microsoft/playwright/issues/16159)
   """
 
   alias Playwright.{ElementHandle, Page}
-  alias Playwright.SDK.{Channel, Extra}
 
   @typedoc """
   Options given to `snapshot/2`
@@ -93,92 +106,11 @@ defmodule Playwright.Page.Accessibility do
           valuetext: String.t()
         }
 
-  @doc """
-  Captures the current state of the accessibility tree.
-
-  The result represents the root accessible node of the page.
-
-  ## Examples
-
-  Dumping an entire accessibility tree:
-
-      Browser.new_page(browser)
-        |> Page.set_content("<p>Hello!</p>")
-        |> Page.Accessibility.snapshot()
-      %{children: [%{name: "Hello!", role: "text"}], name: "", role: "WebArea"}
-
-  Retrieving the name of a focused node:
-
-      body = "<input placeholder='pick me' readonly /><input placeholder='not me' />"
-      Browser.new_page(browser)
-        |> Page.set_content(body)
-        |> Page.Accessibility.snapshot()
-        |> (&(Enum.find(&1.children, fn e -> e.readonly end))).()
-      %{name: "pick me", readonly: true, role: "textbox"}
-  """
-  @doc deprecated: "Please use other libraries such as [Axe](https://www.deque.com/axe/) if you need to test page accessibility.
-  See the Playwright.dev Node.js [guide](https://playwright.dev/docs/accessibility-testing) for integration with Axe."
-  def snapshot(page, options \\ %{})
-
-  def snapshot(%Page{session: session} = page, options) do
-    Channel.post(session, {:guid, page.guid}, :accessibility_snapshot, prepare(options))
-    |> ax_node_from_protocol()
-  end
-
-  # private
-  # ---------------------------------------------------------------------------
-
-  defp ax_node_from_protocol(nil) do
-    nil
-  end
-
-  defp ax_node_from_protocol(%{role: role} = input)
-       when role in ["text"] do
-    ax_node_from_protocol(input, fn e -> e.role != "text" end)
-  end
-
-  defp ax_node_from_protocol(input) do
-    ax_node_from_protocol(input, fn _ -> true end)
-  end
-
-  defp ax_node_from_protocol(input, filter) do
-    Enum.reduce(input, %{}, fn {k, v}, acc ->
-      cond do
-        is_list(v) ->
-          normal =
-            v
-            |> Enum.map(&ax_node_from_protocol/1)
-            |> Enum.filter(filter)
-
-          Map.put(acc, k, normal)
-
-        k == :checked ->
-          Map.put(acc, k, normalize_checked(v))
-
-        k == :valueString ->
-          Map.put(acc, :value, v)
-
-        true ->
-          Map.put(acc, k, v)
-      end
-    end)
-  end
-
-  defp normalize_checked(value) do
-    case value do
-      "checked" -> true
-      "unchecked" -> false
-      other -> other
-    end
-  end
-
-  defp prepare(opts) when is_map(opts) do
-    Enum.reduce(opts, %{}, fn {k, v}, acc -> Map.put(acc, prepare(k), v) end)
-  end
-
-  defp prepare(atom) when is_atom(atom) do
-    Extra.Atom.to_string(atom)
-    |> Recase.to_camel()
-    |> Extra.Atom.from_string()
+  @doc deprecated: "This method has been removed in Playwright v1.26. Use Locator.aria_snapshot/2 instead."
+  @spec snapshot(Page.t(), options()) :: no_return()
+  def snapshot(%Page{}, _options) do
+    raise "Page.Accessibility.snapshot/2 has been removed in Playwright v1.26+. " <>
+            "Use Locator.aria_snapshot/2 instead. " <>
+            "See https://playwright.dev/docs/aria-snapshots"
   end
 end

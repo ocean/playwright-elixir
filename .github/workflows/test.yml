@@ -13,7 +13,7 @@ jobs:
       PLAYWRIGHT_TRANSPORT: driver
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Set up Elixir
         uses: erlef/setup-beam@v1

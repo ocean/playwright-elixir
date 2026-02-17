@@ -18,7 +18,7 @@ updates:
       semver-patch-days: 2
   # Enable version checks and updates for Node.js dependencies.
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/priv/static"
     schedule:
       interval: "weekly"
       day: "sunday"
